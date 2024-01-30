@@ -1,0 +1,44 @@
+# Build and deploy a new Docker image on each new tag
+
+name: Deploy
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - "*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Get Node version
+        id: get_node_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const package = require("./package.json");
+            const nodeVersionSpec = package.engines.node;
+            return nodeVersionSpec;
+          result-encoding: string
+
+      - name: Install Node.js ${{ steps.get_node_version.outputs.result }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.get_node_version.outputs.result }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Typescript
+        run: npm run build --if-present
+
+      - name: Publish npm package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
