@@ -1,0 +1,51 @@
+# Bump version and tag on every PR branch merge back into main
+
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    if: "${{ !startsWith(github.event.head_commit.message, 'chore: ') }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log github.event.head_commit.author.username
+        run: echo "${{ github.event.head_commit.author.username }}"
+
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          # needed to bypass branch protection
+          persist-credentials: false
+
+      - name: Automated version bump
+        id: version-bump
+        uses: "phips28/gh-action-bump-version@v10.1.1"
+        with:
+          tag-prefix: "v"
+          patch-wording: "fix,chore,docs,style,refactor,test,chore"
+          minor-wording: "feat"
+          major-wording: "BREAKING"
+        env:
+          # need PAT to bypass branch protection
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - name: Create release
+        if: "${{ steps.version-bump.outputs.newTag != '' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
+        run: |
+          gh release create "${NEW_TAG}" \
+            --repo="${GITHUB_REPOSITORY}" \
+            --title="${NEW_TAG}" \
+            --generate-notes
