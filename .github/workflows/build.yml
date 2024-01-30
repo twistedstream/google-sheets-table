@@ -1,0 +1,41 @@
+# Run tests and checks on every push
+
+name: Build
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Get Node version
+        id: get_node_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const package = require("./package.json");
+            const nodeVersionSpec = package.engines.node;
+            return nodeVersionSpec;
+          result-encoding: string
+
+      - name: Install Node.js ${{ steps.get_node_version.outputs.result }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.get_node_version.outputs.result }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Typescript
+        run: npm run build --if-present
+
+      - name: Check code formatting
+        run: npm run format
+
+      - name: Run unit tests
+        run: npm run test
