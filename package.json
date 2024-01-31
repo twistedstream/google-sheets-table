@@ -21,7 +21,7 @@
   "prepublish": "tsc",
   "repository": {
     "type": "git",
-    "url": "https://github.com/twistedstream/google-sheets-table.git"
+    "url": "git+https://github.com/twistedstream/google-sheets-table.git"
   },
   "author": "twistedstream",
   "license": "MIT",
