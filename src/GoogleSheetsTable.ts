@@ -1,6 +1,7 @@
 import { sheets_v4 } from "@googleapis/sheets";
 import { Mutex } from "async-mutex";
 
+import { track } from "./async-tracker";
 import { createClient } from "./client";
 import { assertValue } from "./error";
 import { processUpdatedData, rowToValues, valuesToRow } from "./row";
@@ -14,6 +15,10 @@ import {
   SearchPredicate,
 } from "./types";
 
+// global mutex across all instances
+console.log(">>> creating Mutex!");
+const mutex = new Mutex();
+
 export class GoogleSheetsTable {
   private options: GoogleSheetsTableOptions;
   private sheets: sheets_v4.Sheets;
@@ -24,7 +29,6 @@ export class GoogleSheetsTable {
     responseValueRenderOption: string;
     responseDateTimeRenderOption: string;
   };
-  private mutex = new Mutex();
 
   constructor(options: GoogleSheetsTableOptions) {
     this.options = options;
@@ -47,8 +51,10 @@ export class GoogleSheetsTable {
     this.deleteRow = this.deleteRow.bind(this);
   }
 
-  async countRows(sheetName: string): Promise<number> {
-    const { spreadsheetId } = this.options;
+  async countRows(): Promise<number> {
+    await track();
+
+    const { spreadsheetId, sheetName } = this.options;
     const range = `${sheetName}!A:A`;
 
     const getResult = await this.sheets.spreadsheets.values.get({
@@ -64,28 +70,28 @@ export class GoogleSheetsTable {
         0;
   }
 
-  async findRows(
-    sheetName: string,
-    predicate: SearchPredicate,
-  ): Promise<{ rows: Row[] }> {
+  async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }> {
+    await track();
+
+    const { sheetName } = this.options;
     const { rows } = await openTable(
       this.sheets,
       this.options.spreadsheetId,
-      sheetName,
+      sheetName
     );
     const foundRows = rows.filter(predicate);
 
     return { rows: foundRows };
   }
 
-  async findRow(
-    sheetName: string,
-    predicate: SearchPredicate,
-  ): Promise<{ row?: Row }> {
+  async findRow(predicate: SearchPredicate): Promise<{ row?: Row }> {
+    await track();
+
+    const { sheetName } = this.options;
     const { rows } = await openTable(
       this.sheets,
       this.options.spreadsheetId,
-      sheetName,
+      sheetName
     );
     const row = rows.find(predicate);
 
@@ -93,10 +99,13 @@ export class GoogleSheetsTable {
   }
 
   async findKeyRows<T extends keyof any>(
-    sheetName: string,
     selector: KeyColumnSelector<T>,
-    keys: T[],
+    keys: T[]
   ): Promise<{ rowsByKey: Record<T, Row> }> {
+    await track();
+
+    const { sheetName } = this.options;
+
     // get distinct list of keys
     const distinctKeys = Array.from(new Set(keys));
 
@@ -111,22 +120,24 @@ export class GoogleSheetsTable {
         p[selector(c)] = c;
         return p;
       },
-      <Record<T, Row>>{},
+      <Record<T, Row>>{}
     );
 
     return { rowsByKey: rowsByValue };
   }
 
   async insertRow(
-    sheetName: string,
     newRow: RowData,
-    constraints: ColumnConstraints = {},
+    constraints: ColumnConstraints = {}
   ): Promise<{ insertedRow: Row }> {
-    return this.mutex.runExclusive(async () => {
+    return mutex.runExclusive(async () => {
+      await track();
+
+      const { sheetName } = this.options;
       const { columns, rows } = await openTable(
         this.sheets,
         this.options.spreadsheetId,
-        sheetName,
+        sheetName
       );
 
       // enforce constraint before insert
@@ -147,28 +158,30 @@ export class GoogleSheetsTable {
       const { updatedRowValues, updatedRowNumber } = processUpdatedData(
         assertValue(assertValue(appendResult.data.updates).updatedData),
         sheetName,
-        rowValues,
+        rowValues
       );
       const insertedRow = valuesToRow(
         updatedRowValues,
         columns,
-        updatedRowNumber,
+        updatedRowNumber
       );
       return { insertedRow };
     });
   }
 
   async updateRow(
-    sheetName: string,
     predicate: SearchPredicate,
     rowUpdates: RowData,
-    constraints: ColumnConstraints = {},
+    constraints: ColumnConstraints = {}
   ): Promise<{ updatedRow: Row }> {
-    return this.mutex.runExclusive(async () => {
+    return mutex.runExclusive(async () => {
+      await track();
+
+      const { sheetName } = this.options;
       const { columns, rows } = await openTable(
         this.sheets,
         this.options.spreadsheetId,
-        sheetName,
+        sheetName
       );
 
       // find existing row
@@ -199,28 +212,27 @@ export class GoogleSheetsTable {
       const { updatedRowValues, updatedRowNumber } = processUpdatedData(
         assertValue(updateResult.data.updatedData),
         sheetName,
-        rowValues,
+        rowValues
       );
       const updatedRow = valuesToRow(
         updatedRowValues,
         columns,
-        updatedRowNumber,
+        updatedRowNumber
       );
       return { updatedRow };
     });
   }
 
-  async deleteRow(
-    sheetName: string,
-    predicate: SearchPredicate,
-  ): Promise<void> {
-    return this.mutex.runExclusive(async () => {
-      const { spreadsheetId } = this.options;
+  async deleteRow(predicate: SearchPredicate): Promise<void> {
+    return mutex.runExclusive(async () => {
+      await track();
+
+      const { spreadsheetId, sheetName } = this.options;
 
       const { rows } = await openTable(
         this.sheets,
         this.options.spreadsheetId,
-        sheetName,
+        sheetName
       );
 
       // find existing row
@@ -232,7 +244,7 @@ export class GoogleSheetsTable {
       // get sheet ID
       const spreadsheet = await this.sheets.spreadsheets.get({ spreadsheetId });
       const sheet = assertValue(spreadsheet.data.sheets).find(
-        (sheet) => assertValue(sheet.properties).title === sheetName,
+        (sheet) => assertValue(sheet.properties).title === sheetName
       );
       if (!sheet) {
         throw new Error(`Sheet with name '${sheetName}' not found`);

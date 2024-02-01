@@ -6,6 +6,7 @@ import { GoogleSheetsTable } from "./GoogleSheetsTable";
 import { Row } from "./types";
 
 // test objects
+const trackStub = sinon.stub();
 const getValuesStub = sinon.stub();
 const appendValuesStub = sinon.stub();
 const updateValuesStub = sinon.stub();
@@ -39,6 +40,7 @@ const row3: Row = { username: "mary", age: 32, _rowNumber: 4 };
 
 function importModule(test: Tap.Test) {
   return test.mock("./GoogleSheetsTable", {
+    "./async-tracker": { track: trackStub },
     "./client": {
       createClient: createClientStub,
     },
@@ -64,11 +66,22 @@ test("GoogleSheetsTable", async (t) => {
 
   const { GoogleSheetsTable } = importModule(t);
 
+  function createInstance(): GoogleSheetsTable {
+    const options = {
+      credentials: {},
+      spreadsheetId: "spreadsheet-id",
+      sheetName: "bananas",
+    };
+
+    return new GoogleSheetsTable(options);
+  }
+
   t.test("constructor", async (t) => {
     t.test("sets the options", async (t) => {
       const options = {
         credentials: {},
         spreadsheetId: "spreadsheet-id",
+        sheetName: "bananas",
       };
 
       const result = new GoogleSheetsTable(options);
@@ -81,6 +94,7 @@ test("GoogleSheetsTable", async (t) => {
       const options = {
         credentials,
         spreadsheetId: "spreadsheet-id",
+        sheetName: "bananas",
       };
 
       const result = new GoogleSheetsTable(options);
@@ -94,6 +108,7 @@ test("GoogleSheetsTable", async (t) => {
       const options = {
         credentials: {},
         spreadsheetId: "spreadsheet-id",
+        sheetName: "bananas",
       };
 
       const result = new GoogleSheetsTable(options);
@@ -108,18 +123,7 @@ test("GoogleSheetsTable", async (t) => {
     });
   });
 
-  t.test("instance methods", async (t) => {
-    function createInstance(): GoogleSheetsTable {
-      const { GoogleSheetsTable } = importModule(t);
-
-      const options = {
-        credentials: {},
-        spreadsheetId: "spreadsheet-id",
-      };
-
-      return new GoogleSheetsTable(options);
-    }
-
+  t.test("instance members", async (t) => {
     t.test("#countRows", async (t) => {
       const values = [
         ["first_name", "last_name", "age"],
@@ -131,7 +135,7 @@ test("GoogleSheetsTable", async (t) => {
         getValuesStub.resolves({ data: { values: undefined } });
 
         const target = createInstance();
-        const result = await target.countRows("bananas");
+        const result = await target.countRows();
 
         t.equal(result, 0);
       });
@@ -140,7 +144,7 @@ test("GoogleSheetsTable", async (t) => {
         getValuesStub.resolves({ data: { values: cloneDeep(values) } });
 
         const target = createInstance();
-        const result = await target.countRows("bananas");
+        const result = await target.countRows();
 
         t.equal(result, 2);
       });
@@ -150,7 +154,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.findRows("bananas", () => true);
+          await target.findRows(() => true);
         } catch {}
 
         t.ok(openTableStub.called);
@@ -163,7 +167,7 @@ test("GoogleSheetsTable", async (t) => {
         openTableStub.resolves({ rows: [row1, row2, row3] });
 
         const target = createInstance();
-        const result = await target.findRows("bananas", (r: any) => r.age > 30);
+        const result = await target.findRows((r: any) => r.age > 30);
 
         t.ok(result.rows);
         t.equal(result.rows.length, 2);
@@ -176,7 +180,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.findRow("bananas", () => true);
+          await target.findRow(() => true);
         } catch {}
 
         t.ok(openTableStub.called);
@@ -189,7 +193,7 @@ test("GoogleSheetsTable", async (t) => {
         openTableStub.resolves({ rows: [row1, row2, row3] });
 
         const target = createInstance();
-        const result = await target.findRow("bananas", (r: any) => r.age > 30);
+        const result = await target.findRow((r: any) => r.age > 30);
 
         t.ok(result.row);
         t.equal(result.row, row1);
@@ -200,7 +204,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.findKeyRows("bananas", (r: any) => r.username, []);
+          await target.findKeyRows((r: any) => r.username, []);
         } catch {}
 
         t.ok(openTableStub.called);
@@ -214,9 +218,8 @@ test("GoogleSheetsTable", async (t) => {
 
         const target = createInstance();
         const result = await target.findKeyRows(
-          "bananas",
           (r: any) => r.username,
-          ["jim", "mary"],
+          ["jim", "mary"]
         );
 
         t.ok(result);
@@ -230,7 +233,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.insertRow("bananas", {}, {});
+          await target.insertRow({}, {});
         } catch {}
 
         t.ok(openTableStub.called);
@@ -247,7 +250,7 @@ test("GoogleSheetsTable", async (t) => {
 
         const target = createInstance();
         try {
-          await target.insertRow("bananas", newRow, constraints);
+          await target.insertRow(newRow, constraints);
         } catch {}
 
         t.ok(enforceConstraintsStub.called);
@@ -265,13 +268,13 @@ test("GoogleSheetsTable", async (t) => {
 
           const target = createInstance();
           try {
-            await target.insertRow("bananas", newRow, {});
+            await target.insertRow(newRow, {});
           } catch {}
 
           t.ok(rowToValuesStub.called);
           t.equal(rowToValuesStub.firstCall.args[0], newRow);
           t.equal(rowToValuesStub.firstCall.args[1], columns);
-        },
+        }
       );
 
       t.test("appends the new row in Google Sheets", async (t) => {
@@ -282,7 +285,7 @@ test("GoogleSheetsTable", async (t) => {
 
         const target = createInstance();
         try {
-          await target.insertRow("bananas", {}, {});
+          await target.insertRow({}, {});
         } catch {}
 
         t.ok(appendValuesStub.called);
@@ -314,14 +317,14 @@ test("GoogleSheetsTable", async (t) => {
 
           const target = createInstance();
           try {
-            await target.insertRow("bananas", {}, {});
+            await target.insertRow({}, {});
           } catch {}
 
           t.ok(processUpdatedDataStub.called);
           t.equal(processUpdatedDataStub.firstCall.args[0], updatedData);
           t.equal(processUpdatedDataStub.firstCall.args[1], "bananas");
           t.equal(processUpdatedDataStub.firstCall.args[2], rowValues);
-        },
+        }
       );
 
       t.test(
@@ -342,14 +345,14 @@ test("GoogleSheetsTable", async (t) => {
 
           const target = createInstance();
           try {
-            await target.insertRow("bananas", {}, {});
+            await target.insertRow({}, {});
           } catch {}
 
           t.ok(valuesToRowStub.called);
           t.equal(valuesToRowStub.firstCall.args[0], updatedRowValues);
           t.equal(valuesToRowStub.firstCall.args[1], columns);
           t.equal(valuesToRowStub.firstCall.args[2], updatedRowNumber);
-        },
+        }
       );
 
       t.test("returns the inserted row", async (t) => {
@@ -366,7 +369,7 @@ test("GoogleSheetsTable", async (t) => {
         valuesToRowStub.returns(insertedRow);
 
         const target = createInstance();
-        const result = await target.insertRow("bananas", {}, {});
+        const result = await target.insertRow({}, {});
 
         t.ok(result);
         t.equal(result.insertedRow, insertedRow);
@@ -377,7 +380,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.updateRow("bananas", () => true, {}, {});
+          await target.updateRow(() => true, {}, {});
         } catch {}
 
         t.ok(openTableStub.called);
@@ -393,7 +396,7 @@ test("GoogleSheetsTable", async (t) => {
 
         const target = createInstance();
         try {
-          await target.updateRow("bananas", predicate, {}, {});
+          await target.updateRow(predicate, {}, {});
         } catch {}
 
         t.ok(rows.find.called);
@@ -405,7 +408,7 @@ test("GoogleSheetsTable", async (t) => {
         openTableStub.resolves({ rows });
 
         const target = createInstance();
-        t.rejects(() => target.updateRow("bananas", () => true, {}, {}), {
+        t.rejects(() => target.updateRow(() => true, {}, {}), {
           message: "Row not found",
         });
       });
@@ -426,7 +429,7 @@ test("GoogleSheetsTable", async (t) => {
 
           const target = createInstance();
           try {
-            await target.updateRow("bananas", () => true, {}, constraints);
+            await target.updateRow(() => true, {}, constraints);
           } catch {}
 
           t.ok(enforceConstraintsStub.called);
@@ -442,14 +445,14 @@ test("GoogleSheetsTable", async (t) => {
 
             const target = createInstance();
             try {
-              await target.updateRow("bananas", () => true, rowUpdates, {});
+              await target.updateRow(() => true, rowUpdates, {});
             } catch {}
 
             t.same(existingRow, rowUpdates);
             t.ok(rowToValuesStub.called);
             t.equal(rowToValuesStub.firstCall.args[0], existingRow);
             t.equal(rowToValuesStub.firstCall.args[1], columns);
-          },
+          }
         );
 
         t.test("updates the row in Google Sheets", async (t) => {
@@ -459,7 +462,7 @@ test("GoogleSheetsTable", async (t) => {
 
           const target = createInstance();
           try {
-            await target.updateRow("bananas", () => true, {}, {});
+            await target.updateRow(() => true, {}, {});
           } catch {}
 
           t.ok(updateValuesStub.called);
@@ -488,14 +491,14 @@ test("GoogleSheetsTable", async (t) => {
 
             const target = createInstance();
             try {
-              await target.updateRow("bananas", () => true, {}, {});
+              await target.updateRow(() => true, {}, {});
             } catch {}
 
             t.ok(processUpdatedDataStub.called);
             t.equal(processUpdatedDataStub.firstCall.args[0], updatedData);
             t.equal(processUpdatedDataStub.firstCall.args[1], "bananas");
             t.equal(processUpdatedDataStub.firstCall.args[2], rowValues);
-          },
+          }
         );
 
         t.test(
@@ -512,14 +515,14 @@ test("GoogleSheetsTable", async (t) => {
 
             const target = createInstance();
             try {
-              await target.updateRow("bananas", () => true, {}, {});
+              await target.updateRow(() => true, {}, {});
             } catch {}
 
             t.ok(valuesToRowStub.called);
             t.equal(valuesToRowStub.firstCall.args[0], updatedRowValues);
             t.equal(valuesToRowStub.firstCall.args[1], columns);
             t.equal(valuesToRowStub.firstCall.args[2], updatedRowNumber);
-          },
+          }
         );
 
         t.test("returns the updated row", async (t) => {
@@ -535,7 +538,7 @@ test("GoogleSheetsTable", async (t) => {
           valuesToRowStub.returns(updatedRow);
 
           const target = createInstance();
-          const result = await target.updateRow("bananas", () => true, {}, {});
+          const result = await target.updateRow(() => true, {}, {});
 
           t.ok(result);
           t.equal(result.updatedRow, updatedRow);
@@ -547,7 +550,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test("opens a table", async (t) => {
         const target = createInstance();
         try {
-          await target.deleteRow("bananas", () => true);
+          await target.deleteRow(() => true);
         } catch {}
 
         t.ok(openTableStub.called);
@@ -563,7 +566,7 @@ test("GoogleSheetsTable", async (t) => {
 
         const target = createInstance();
         try {
-          await target.deleteRow("bananas", predicate);
+          await target.deleteRow(predicate);
         } catch {}
 
         t.ok(rows.find.called);
@@ -575,7 +578,7 @@ test("GoogleSheetsTable", async (t) => {
         openTableStub.resolves({ rows });
 
         const target = createInstance();
-        t.rejects(() => target.deleteRow("bananas", () => true), {
+        t.rejects(() => target.deleteRow(() => true), {
           message: "Row not found",
         });
       });
@@ -592,7 +595,7 @@ test("GoogleSheetsTable", async (t) => {
         t.test("gets the spreadsheet object from Google Sheets", async (t) => {
           const target = createInstance();
           try {
-            await target.deleteRow("bananas", () => true);
+            await target.deleteRow(() => true);
           } catch {}
 
           t.ok(getSpreadsheetStub.called);
@@ -607,10 +610,10 @@ test("GoogleSheetsTable", async (t) => {
             getSpreadsheetStub.resolves({ data: { sheets: [] } });
 
             const target = createInstance();
-            t.rejects(() => target.deleteRow("bananas", () => true), {
+            t.rejects(() => target.deleteRow(() => true), {
               message: "Sheet with name 'bananas' not found",
             });
-          },
+          }
         );
 
         t.test(
@@ -622,7 +625,7 @@ test("GoogleSheetsTable", async (t) => {
             getSpreadsheetStub.resolves({ data: { sheets: [sheet] } });
 
             const target = createInstance();
-            await target.deleteRow("bananas", () => true);
+            await target.deleteRow(() => true);
 
             t.ok(batchUpdateSpreadsheetStub.called);
             t.same(batchUpdateSpreadsheetStub.firstCall.firstArg, {
@@ -642,89 +645,77 @@ test("GoogleSheetsTable", async (t) => {
                 ],
               },
             });
-          },
+          }
         );
       });
     });
+  });
 
-    t.test("atomic behavior", async (t) => {
-      async function waitForNextLoop() {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
-      const doNothing = () => undefined;
+  t.test("atomic behavior", async (t) => {
+    async function sleep(duration: number) {
+      return new Promise((resolve) => setTimeout(resolve, duration));
+    }
 
-      t.test("read-only functions don't serialize", async (t) => {
-        const target = createInstance();
+    const doNothing = () => undefined;
 
-        // force previous calls to happen after latter calls
-        getValuesStub.onFirstCall().callsFake(async () => {
-          await waitForNextLoop();
-          await waitForNextLoop();
-          await waitForNextLoop();
+    function createFakes(labels: string[], calls: string[]) {
+      labels.forEach((label, index) => {
+        // early fakes have longer sleep durations
+        const sleepDuration = (labels.length - index) * 10;
+
+        trackStub.onCall(index).callsFake(async () => {
+          await sleep(sleepDuration);
+          calls.push(label);
         });
-        openTableStub.onCall(0).callsFake(async () => {
-          await waitForNextLoop();
-          await waitForNextLoop();
-        });
-        openTableStub.onCall(1).callsFake(async () => {
-          await waitForNextLoop();
-        });
-        openTableStub.onCall(2).resolves();
-
-        const calls: any = [];
-        await Promise.all([
-          target
-            .countRows("bananas")
-            .catch(doNothing)
-            .then(() => calls.push("first")),
-          target
-            .findRows("bananas", () => true)
-            .catch(doNothing)
-            .then(() => calls.push("second")),
-          target
-            .findRow("bananas", () => true)
-            .catch(doNothing)
-            .then(() => calls.push("third")),
-          target
-            .findKeyRows("bananas", (r: any) => r.username, [])
-            .catch(doNothing)
-            .then(() => calls.push("fourth")),
-        ]);
-
-        t.same(calls, ["fourth", "third", "second", "first"]);
       });
+    }
 
-      t.test("write functions do serialize", async (t) => {
-        const target = createInstance();
+    t.test("read-only functions don't serialize", async (t) => {
+      // test across multiple instances
+      const target1 = createInstance();
+      const target2 = createInstance();
 
-        // force previous calls to happen after latter calls
-        openTableStub.onCall(0).callsFake(async () => {
-          await waitForNextLoop();
-          await waitForNextLoop();
-        });
-        openTableStub.onCall(1).callsFake(async () => {
-          await waitForNextLoop();
-        });
-        openTableStub.onCall(2).resolves();
+      // force early calls take longer than later calls
+      const labels = "abcdefgh".split("");
+      const calls: any = [];
+      createFakes(labels, calls);
 
-        const calls: any = [];
-        await Promise.all([
-          target
-            .insertRow("bananas", {})
-            .catch(doNothing)
-            .then(() => calls.push("first")),
-          target
-            .updateRow("bananas", () => true, {})
-            .catch(doNothing)
-            .then(() => calls.push("second")),
-          target
-            .deleteRow("bananas", () => true)
-            .catch(doNothing)
-            .then(() => calls.push("third")),
-        ]);
+      await Promise.all([
+        target1.countRows().catch(doNothing),
+        target2.countRows().catch(doNothing),
+        target1.findRows(() => true).catch(doNothing),
+        target2.findRows(() => true).catch(doNothing),
+        target1.findRow(() => true).catch(doNothing),
+        target2.findRow(() => true).catch(doNothing),
+        target1.findKeyRows((r: any) => r.username, []).catch(doNothing),
+        target2.findKeyRows((r: any) => r.username, []).catch(doNothing),
+      ]);
 
-        t.same(calls, ["first", "second", "third"]);
-      });
+      // calls should complete in reverse order
+      t.same(calls, [...labels].reverse());
+    });
+
+    t.test("write functions do serialize", async (t) => {
+      // test across multiple instances
+      const target1 = createInstance();
+      const target2 = createInstance();
+
+      // force early calls take longer than later calls
+      const labels = "abcdef".split("");
+      const calls: any = [];
+      createFakes(labels, calls);
+
+      await Promise.all([
+        target1.insertRow({}).catch(doNothing),
+        target2.insertRow({}).catch(doNothing),
+        target1.updateRow(() => true, {}).catch(doNothing),
+        target2.updateRow(() => true, {}).catch(doNothing),
+        target1.deleteRow(() => true).catch(doNothing),
+        target2.deleteRow(() => true).catch(doNothing),
+      ]);
+
+      // calls should complete in same order as made
+      t.same(calls, labels);
     });
   });
 });
