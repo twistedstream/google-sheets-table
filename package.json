@@ -16,7 +16,7 @@
     "dev": "tsc --watch",
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
     "format": "prettier --write .",
-    "test": "tap --ts --reporter=spec"
+    "test": "rm -rf ./dist && tap --ts --reporter=spec"
   },
   "prepublish": "tsc",
   "repository": {
@@ -32,14 +32,17 @@
   "dependencies": {
     "@googleapis/drive": "^8.6.0",
     "@googleapis/sheets": "^5.0.5",
+    "async-mutex": "^0.4.1",
     "google-auth-library": "^9.5.0"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.5",
     "@types/sinon": "^17.0.3",
     "@types/tap": "^15.0.7",
     "fix-tsup-cjs": "^1.2.0",
+    "lodash": "^4.17.21",
     "prettier": "^3.2.4",
     "sinon": "^17.0.1",
     "tap": "^16.3.0",
