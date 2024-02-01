@@ -14,8 +14,6 @@ import {
   SearchPredicate,
 } from "./types";
 
-const mutex = new Mutex();
-
 export class GoogleSheetsTable {
   private options: GoogleSheetsTableOptions;
   private sheets: sheets_v4.Sheets;
@@ -26,6 +24,7 @@ export class GoogleSheetsTable {
     responseValueRenderOption: string;
     responseDateTimeRenderOption: string;
   };
+  private mutex = new Mutex();
 
   constructor(options: GoogleSheetsTableOptions) {
     this.options = options;
@@ -123,7 +122,7 @@ export class GoogleSheetsTable {
     newRow: RowData,
     constraints: ColumnConstraints = {},
   ): Promise<{ insertedRow: Row }> {
-    return mutex.runExclusive(async () => {
+    return this.mutex.runExclusive(async () => {
       const { columns, rows } = await openTable(
         this.sheets,
         this.options.spreadsheetId,
@@ -165,7 +164,7 @@ export class GoogleSheetsTable {
     rowUpdates: RowData,
     constraints: ColumnConstraints = {},
   ): Promise<{ updatedRow: Row }> {
-    return mutex.runExclusive(async () => {
+    return this.mutex.runExclusive(async () => {
       const { columns, rows } = await openTable(
         this.sheets,
         this.options.spreadsheetId,
@@ -215,7 +214,7 @@ export class GoogleSheetsTable {
     sheetName: string,
     predicate: SearchPredicate,
   ): Promise<void> {
-    return mutex.runExclusive(async () => {
+    return this.mutex.runExclusive(async () => {
       const { spreadsheetId } = this.options;
 
       const { rows } = await openTable(
