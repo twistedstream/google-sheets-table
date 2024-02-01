@@ -12,7 +12,7 @@ export type Row = { _rowNumber: number } & RowData;
 export type SearchPredicate = (
   row: Row,
   index: number,
-  array: Row[],
+  array: Row[]
 ) => boolean;
 
 export type KeyColumnSelector<T extends keyof any> = (row: Row) => T;
