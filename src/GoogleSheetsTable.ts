@@ -16,7 +16,6 @@ import {
 } from "./types";
 
 // global mutex across all instances
-console.log(">>> creating Mutex!");
 const mutex = new Mutex();
 
 export class GoogleSheetsTable {
