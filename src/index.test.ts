@@ -1,9 +1,13 @@
 import sinon from "sinon";
 import { test } from "tap";
 
+class MockGoogleSheetsTable {}
+
 function importModule(test: Tap.Test) {
   return test.mock("./index", {
-    // FUTURE: dependencies
+    "./GoogleSheetsTable": {
+      GoogleSheetsTable: MockGoogleSheetsTable,
+    },
   });
 }
 
@@ -13,13 +17,11 @@ test("index", async (t) => {
     sinon.resetHistory();
   });
 
-  t.test("#hello", async (t) => {
-    const { hello } = importModule(t);
+  t.test("exports", async (t) => {
+    const { GoogleSheetsTable } = importModule(t);
 
-    t.test("returns expected message", async (t) => {
-      const result = hello();
-
-      t.match(result, "Greetings");
+    t.test("GoogleSheetsTable", async (t) => {
+      t.equal(GoogleSheetsTable, MockGoogleSheetsTable);
     });
   });
 });

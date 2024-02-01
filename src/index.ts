@@ -1,3 +1,3 @@
-export function hello(): string {
-  return "Greetings, program";
-}
+import { GoogleSheetsTable } from "./GoogleSheetsTable";
+
+export { GoogleSheetsTable };
