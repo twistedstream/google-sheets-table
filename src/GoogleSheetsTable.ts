@@ -7,7 +7,6 @@ import { assertValue } from "./error";
 import { processUpdatedData, rowToValues, valuesToRow } from "./row";
 import { enforceConstraints, openTable } from "./table";
 import {
-  ColumnConstraints,
   GoogleSheetsTableOptions,
   KeyColumnSelector,
   Row,
@@ -122,11 +121,8 @@ export class GoogleSheetsTable {
     return { rowsByKey: rowsByValue };
   }
 
-  async insertRow(
-    newRow: RowData,
-    constraints: ColumnConstraints = {}
-  ): Promise<{ insertedRow: Row }> {
-    const { spreadsheetId, sheetName } = this.options;
+  async insertRow(newRow: RowData): Promise<{ insertedRow: Row }> {
+    const { spreadsheetId, sheetName, columnConstraints } = this.options;
 
     return lock(spreadsheetId, async () => {
       await track();
@@ -138,7 +134,7 @@ export class GoogleSheetsTable {
       );
 
       // enforce constraint before insert
-      enforceConstraints(rows, newRow, constraints);
+      enforceConstraints(rows, newRow, columnConstraints);
 
       // append row
       const rowValues = rowToValues(newRow, columns);
@@ -168,10 +164,9 @@ export class GoogleSheetsTable {
 
   async updateRow(
     predicate: SearchPredicate,
-    rowUpdates: RowData,
-    constraints: ColumnConstraints = {}
+    rowUpdates: RowData
   ): Promise<{ updatedRow: Row }> {
-    const { spreadsheetId, sheetName } = this.options;
+    const { spreadsheetId, sheetName, columnConstraints } = this.options;
 
     return lock(spreadsheetId, async () => {
       await track();
@@ -194,7 +189,7 @@ export class GoogleSheetsTable {
       }
 
       // enforce constraints before update
-      enforceConstraints(rows, existingRow, constraints);
+      enforceConstraints(rows, existingRow, columnConstraints);
 
       // update row
       const rowValues = rowToValues(existingRow, columns);
