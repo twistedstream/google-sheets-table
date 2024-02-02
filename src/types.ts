@@ -3,6 +3,7 @@ import { JWTInput } from "google-auth-library";
 export type GoogleSheetsTableOptions = {
   spreadsheetId: string;
   credentials: JWTInput;
+  sheetName: string;
 };
 
 export type RowData = { [name: string]: any };
