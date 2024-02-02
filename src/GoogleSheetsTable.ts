@@ -15,6 +15,13 @@ import {
   SearchPredicate,
 } from "./types";
 
+/**
+ * Enables row-level interactions with a single sheet within a Google Sheets spreadsheet.
+ *
+ * @export
+ * @class GoogleSheetsTable
+ * @typedef {GoogleSheetsTable}
+ */
 export class GoogleSheetsTable {
   private options: GoogleSheetsTableOptions;
   private sheets: sheets_v4.Sheets;
@@ -26,6 +33,12 @@ export class GoogleSheetsTable {
     responseDateTimeRenderOption: string;
   };
 
+  /**
+   * Creates an instance of GoogleSheetsTable.
+   *
+   * @constructor
+   * @param {GoogleSheetsTableOptions} options
+   */
   constructor(options: GoogleSheetsTableOptions) {
     this.options = options;
     const { credentials, spreadsheetId } = this.options;
@@ -47,6 +60,12 @@ export class GoogleSheetsTable {
     this.deleteRow = this.deleteRow.bind(this);
   }
 
+  /**
+   * Counts the total number of rows in the table.
+   *
+   * @async
+   * @returns {Promise<number>} The row count.
+   */
   async countRows(): Promise<number> {
     await track();
 
@@ -66,6 +85,13 @@ export class GoogleSheetsTable {
         0;
   }
 
+  /**
+   * Finds zero or more rows within the table.
+   *
+   * @async
+   * @param {SearchPredicate} predicate The search function.
+   * @returns {Promise<{ rows: Row[] }>} The found rows.
+   */
   async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }> {
     await track();
 
@@ -80,6 +106,13 @@ export class GoogleSheetsTable {
     return { rows: foundRows };
   }
 
+  /**
+   * Finds the first row within the table.
+   *
+   * @async
+   * @param {SearchPredicate} predicate The search function.
+   * @returns {Promise<{ row?: Row }>} The found row.
+   */
   async findRow(predicate: SearchPredicate): Promise<{ row?: Row }> {
     await track();
 
@@ -94,6 +127,15 @@ export class GoogleSheetsTable {
     return { row };
   }
 
+  /**
+   * Finds all of the rows in the table that are identified by a set of keys.
+   *
+   * @async
+   * @template {keyof any} T The type of the key
+   * @param {KeyColumnSelector<T>} selector A function that selects the key column within each row.
+   * @param {T[]} keys An array of keys to search for.
+   * @returns {Promise<{ rowsByKey: Record<T, Row> }>} A dictionary of keys to matching rows.
+   */
   async findKeyRows<T extends keyof any>(
     selector: KeyColumnSelector<T>,
     keys: T[]
@@ -122,6 +164,13 @@ export class GoogleSheetsTable {
     return { rowsByKey: rowsByValue };
   }
 
+  /**
+   * Inserts a new row into the table.
+   *
+   * @async
+   * @param {RowData} newRow An object containing the row data to insert.
+   * @returns {Promise<{ insertedRow: Row }>} The inserted row.
+   */
   async insertRow(newRow: RowData): Promise<{ insertedRow: Row }> {
     const { spreadsheetId, sheetName, columnConstraints } = this.options;
 
@@ -163,6 +212,15 @@ export class GoogleSheetsTable {
     });
   }
 
+  /**
+   * Updates the data of an existing row in the table.
+   *
+   * @async
+   * @param {SearchPredicate} predicate The search function used to find the existing row to update.
+   * @param {RowData} rowUpdates An object containing the data to update.
+   * @returns {Promise<{ updatedRow: Row }>} The updated row.
+   * @throws {Error} Row is not found
+   */
   async updateRow(
     predicate: SearchPredicate,
     rowUpdates: RowData
@@ -220,6 +278,14 @@ export class GoogleSheetsTable {
     });
   }
 
+  /**
+   * Deletes an existing row in the table.
+   *
+   * @async
+   * @param {SearchPredicate} predicate The search function used to find the existing row to delete.
+   * @returns {Promise<void>}
+   * @throws {Error} Row is not found
+   */
   async deleteRow(predicate: SearchPredicate): Promise<void> {
     const { spreadsheetId, sheetName } = this.options;
 
