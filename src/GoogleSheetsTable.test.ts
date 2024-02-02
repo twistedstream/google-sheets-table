@@ -651,7 +651,7 @@ test("GoogleSheetsTable", async (t) => {
     });
   });
 
-  t.test("concurrent behavior", async (t) => {
+  t.test("concurrency behavior", async (t) => {
     async function sleep(duration: number) {
       return new Promise((resolve) => setTimeout(resolve, duration));
     }
