@@ -1,8 +1,8 @@
 import { sheets_v4 } from "@googleapis/sheets";
-import { Mutex } from "async-mutex";
 
 import { track } from "./async-tracker";
 import { createClient } from "./client";
+import { lock } from "./concurrency";
 import { assertValue } from "./error";
 import { processUpdatedData, rowToValues, valuesToRow } from "./row";
 import { enforceConstraints, openTable } from "./table";
@@ -14,9 +14,6 @@ import {
   RowData,
   SearchPredicate,
 } from "./types";
-
-// global mutex across all instances
-const mutex = new Mutex();
 
 export class GoogleSheetsTable {
   private options: GoogleSheetsTableOptions;
@@ -129,13 +126,14 @@ export class GoogleSheetsTable {
     newRow: RowData,
     constraints: ColumnConstraints = {}
   ): Promise<{ insertedRow: Row }> {
-    return mutex.runExclusive(async () => {
+    const { spreadsheetId, sheetName } = this.options;
+
+    return lock(spreadsheetId, async () => {
       await track();
 
-      const { sheetName } = this.options;
       const { columns, rows } = await openTable(
         this.sheets,
-        this.options.spreadsheetId,
+        spreadsheetId,
         sheetName
       );
 
@@ -173,13 +171,14 @@ export class GoogleSheetsTable {
     rowUpdates: RowData,
     constraints: ColumnConstraints = {}
   ): Promise<{ updatedRow: Row }> {
-    return mutex.runExclusive(async () => {
+    const { spreadsheetId, sheetName } = this.options;
+
+    return lock(spreadsheetId, async () => {
       await track();
 
-      const { sheetName } = this.options;
       const { columns, rows } = await openTable(
         this.sheets,
-        this.options.spreadsheetId,
+        spreadsheetId,
         sheetName
       );
 
@@ -223,16 +222,12 @@ export class GoogleSheetsTable {
   }
 
   async deleteRow(predicate: SearchPredicate): Promise<void> {
-    return mutex.runExclusive(async () => {
+    const { spreadsheetId, sheetName } = this.options;
+
+    return lock(spreadsheetId, async () => {
       await track();
 
-      const { spreadsheetId, sheetName } = this.options;
-
-      const { rows } = await openTable(
-        this.sheets,
-        this.options.spreadsheetId,
-        sheetName
-      );
+      const { rows } = await openTable(this.sheets, spreadsheetId, sheetName);
 
       // find existing row
       const existingRow = rows.find(predicate);

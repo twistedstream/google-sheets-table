@@ -66,10 +66,10 @@ test("GoogleSheetsTable", async (t) => {
 
   const { GoogleSheetsTable } = importModule(t);
 
-  function createInstance(): GoogleSheetsTable {
+  function createInstance(spreadsheetId = "spreadsheet-id"): GoogleSheetsTable {
     const options = {
       credentials: {},
-      spreadsheetId: "spreadsheet-id",
+      spreadsheetId,
       sheetName: "bananas",
     };
 
@@ -651,7 +651,7 @@ test("GoogleSheetsTable", async (t) => {
     });
   });
 
-  t.test("atomic behavior", async (t) => {
+  t.test("concurrent behavior", async (t) => {
     async function sleep(duration: number) {
       return new Promise((resolve) => setTimeout(resolve, duration));
     }
@@ -661,7 +661,7 @@ test("GoogleSheetsTable", async (t) => {
     function createFakes(labels: string[], calls: string[]) {
       labels.forEach((label, index) => {
         // early fakes have longer sleep durations
-        const sleepDuration = (labels.length - index) * 10;
+        const sleepDuration = (labels.length - index) * 10; //ms
 
         trackStub.onCall(index).callsFake(async () => {
           await sleep(sleepDuration);
@@ -670,52 +670,87 @@ test("GoogleSheetsTable", async (t) => {
       });
     }
 
-    t.test("read-only functions don't serialize", async (t) => {
-      // test across multiple instances
-      const target1 = createInstance();
-      const target2 = createInstance();
+    t.test(
+      "read-only methods DO NOT serialize (across methods of the same instance, multiple instances, or multiple spreadsheets)",
+      async (t) => {
+        // test across multiple instances and spreadsheets
+        const target1 = createInstance("spreadsheet1");
+        const target2 = createInstance("spreadsheet1");
+        const target3 = createInstance("spreadsheet2");
+
+        // force early calls take longer than later calls
+        const labels = "abcdefghijkl".split("");
+        const calls: any = [];
+        createFakes(labels, calls);
+
+        await Promise.all([
+          target1.countRows().catch(doNothing),
+          target2.countRows().catch(doNothing),
+          target3.countRows().catch(doNothing),
+          target1.findRows(() => true).catch(doNothing),
+          target2.findRows(() => true).catch(doNothing),
+          target3.findRows(() => true).catch(doNothing),
+          target1.findRow(() => true).catch(doNothing),
+          target2.findRow(() => true).catch(doNothing),
+          target3.findRow(() => true).catch(doNothing),
+          target1.findKeyRows((r: any) => r.username, []).catch(doNothing),
+          target2.findKeyRows((r: any) => r.username, []).catch(doNothing),
+          target3.findKeyRows((r: any) => r.username, []).catch(doNothing),
+        ]);
+
+        // calls should complete in reverse order (no serialization)
+        const expected = [...labels].reverse();
+        t.same(calls, expected, `expected call order: ${expected}`);
+      }
+    );
+
+    t.test(
+      "write methods DO serialize within methods of the same instance or same spreadsheet",
+      async (t) => {
+        // test across multiple instances, but same spreadsheet
+        const target1 = createInstance("spreadsheet1");
+        const target2 = createInstance("spreadsheet1");
+
+        // force early calls take longer than later calls
+        const labels = "abcdef".split("");
+        const calls: any = [];
+        createFakes(labels, calls);
+
+        await Promise.all([
+          target1.insertRow({}).catch(doNothing),
+          target2.insertRow({}).catch(doNothing),
+          target1.updateRow(() => true, {}).catch(doNothing),
+          target2.updateRow(() => true, {}).catch(doNothing),
+          target1.deleteRow(() => true).catch(doNothing),
+          target2.deleteRow(() => true).catch(doNothing),
+        ]);
+
+        // calls should complete in same order they were made (serialization)
+        const expected = [...labels];
+        t.same(calls, expected, `expected call order: ${expected}`);
+      }
+    );
+
+    t.test("write methods DO NOT serialize across spreadsheets", async (t) => {
+      // test across multiple instances, each with its own spreadsheet
+      const target1 = createInstance("spreadsheet1");
+      const target2 = createInstance("spreadsheet2");
+      const target3 = createInstance("spreadsheet3");
 
       // force early calls take longer than later calls
-      const labels = "abcdefgh".split("");
-      const calls: any = [];
-      createFakes(labels, calls);
-
-      await Promise.all([
-        target1.countRows().catch(doNothing),
-        target2.countRows().catch(doNothing),
-        target1.findRows(() => true).catch(doNothing),
-        target2.findRows(() => true).catch(doNothing),
-        target1.findRow(() => true).catch(doNothing),
-        target2.findRow(() => true).catch(doNothing),
-        target1.findKeyRows((r: any) => r.username, []).catch(doNothing),
-        target2.findKeyRows((r: any) => r.username, []).catch(doNothing),
-      ]);
-
-      // calls should complete in reverse order
-      t.same(calls, [...labels].reverse());
-    });
-
-    t.test("write functions do serialize", async (t) => {
-      // test across multiple instances
-      const target1 = createInstance();
-      const target2 = createInstance();
-
-      // force early calls take longer than later calls
-      const labels = "abcdef".split("");
+      const labels = "abc".split("");
       const calls: any = [];
       createFakes(labels, calls);
 
       await Promise.all([
         target1.insertRow({}).catch(doNothing),
         target2.insertRow({}).catch(doNothing),
-        target1.updateRow(() => true, {}).catch(doNothing),
-        target2.updateRow(() => true, {}).catch(doNothing),
-        target1.deleteRow(() => true).catch(doNothing),
-        target2.deleteRow(() => true).catch(doNothing),
+        target3.insertRow({}).catch(doNothing),
       ]);
 
-      // calls should complete in same order as made
-      t.same(calls, labels);
+      // calls should complete in reverse order (no serialization)
+      const expected = [...labels].reverse();
+      t.same(calls, expected, `expected call order: ${expected}`);
     });
   });
 });
