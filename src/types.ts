@@ -4,6 +4,7 @@ export type GoogleSheetsTableOptions = {
   spreadsheetId: string;
   credentials: JWTInput;
   sheetName: string;
+  columnConstraints: ColumnConstraints;
 };
 
 export type RowData = { [name: string]: any };
