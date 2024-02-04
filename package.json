@@ -30,7 +30,6 @@
   },
   "homepage": "https://github.com/twistedstream/google-sheets-table#readme",
   "dependencies": {
-    "@googleapis/drive": "^8.6.0",
     "@googleapis/sheets": "^5.0.5",
     "async-mutex": "^0.4.1",
     "google-auth-library": "^9.5.0"
