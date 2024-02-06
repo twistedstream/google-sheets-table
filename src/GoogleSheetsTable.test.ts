@@ -421,12 +421,6 @@ test("GoogleSheetsTable", async (t) => {
         let existingRow: any;
         let rows: any;
         const columns: any = [];
-        const rowUpdates = { last_name: "Smith" };
-        const updateRowData = {
-          first_name: "Bob",
-          last_name: "Smith",
-          age: 42,
-        };
 
         t.beforeEach(async () => {
           existingRow = {
@@ -440,18 +434,18 @@ test("GoogleSheetsTable", async (t) => {
         });
 
         t.test(
-          "enforces column constraints against the updated row data",
+          "enforces column constraints against the updated row",
           async (t) => {
             const columnConstraints = {};
 
             const target = createInstance({ columnConstraints });
             try {
-              await target.updateRow(() => true, rowUpdates);
+              await target.updateRow(() => true, {});
             } catch {}
 
             t.ok(enforceConstraintsStub.called);
             t.equal(enforceConstraintsStub.firstCall.args[0], rows);
-            t.same(enforceConstraintsStub.firstCall.args[1], updateRowData);
+            t.equal(enforceConstraintsStub.firstCall.args[1], existingRow);
             t.equal(
               enforceConstraintsStub.firstCall.args[2],
               columnConstraints
@@ -460,15 +454,21 @@ test("GoogleSheetsTable", async (t) => {
         );
 
         t.test(
-          "converts the updated row data to Google Sheets values",
+          "removes metadata properties from the updated row and converts it to Google Sheets values",
           async (t) => {
+            const rowUpdates = { last_name: "Smith" };
+
             const target = createInstance();
             try {
               await target.updateRow(() => true, rowUpdates);
             } catch {}
 
             t.ok(rowToValuesStub.called);
-            t.same(rowToValuesStub.firstCall.args[0], updateRowData);
+            t.same(rowToValuesStub.firstCall.args[0], {
+              first_name: "Bob",
+              last_name: "Smith",
+              age: 42,
+            });
             t.equal(rowToValuesStub.firstCall.args[1], columns);
           }
         );
