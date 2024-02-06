@@ -421,40 +421,54 @@ test("GoogleSheetsTable", async (t) => {
         let existingRow: any;
         let rows: any;
         const columns: any = [];
+        const rowUpdates = { last_name: "Smith" };
+        const updateRowData = {
+          first_name: "Bob",
+          last_name: "Smith",
+          age: 42,
+        };
 
         t.beforeEach(async () => {
-          existingRow = {};
+          existingRow = {
+            first_name: "Bob",
+            last_name: "S",
+            age: 42,
+            _rowNumber: 7,
+          };
           rows = { find: sinon.fake.returns(existingRow) };
           openTableStub.resolves({ columns, rows });
         });
 
-        t.test("enforces column constraints", async (t) => {
-          const columnConstraints = {};
+        t.test(
+          "enforces column constraints against the updated row data",
+          async (t) => {
+            const columnConstraints = {};
 
-          const target = createInstance({ columnConstraints });
-          try {
-            await target.updateRow(() => true, {});
-          } catch {}
+            const target = createInstance({ columnConstraints });
+            try {
+              await target.updateRow(() => true, rowUpdates);
+            } catch {}
 
-          t.ok(enforceConstraintsStub.called);
-          t.equal(enforceConstraintsStub.firstCall.args[0], rows);
-          t.equal(enforceConstraintsStub.firstCall.args[1], existingRow);
-          t.equal(enforceConstraintsStub.firstCall.args[2], columnConstraints);
-        });
+            t.ok(enforceConstraintsStub.called);
+            t.equal(enforceConstraintsStub.firstCall.args[0], rows);
+            t.same(enforceConstraintsStub.firstCall.args[1], updateRowData);
+            t.equal(
+              enforceConstraintsStub.firstCall.args[2],
+              columnConstraints
+            );
+          }
+        );
 
         t.test(
-          "the existing row has been updated and converted to Google Sheets values",
+          "converts the updated row data to Google Sheets values",
           async (t) => {
-            const rowUpdates = { foo: "bar", baz: 42 };
-
             const target = createInstance();
             try {
               await target.updateRow(() => true, rowUpdates);
             } catch {}
 
-            t.same(existingRow, rowUpdates);
             t.ok(rowToValuesStub.called);
-            t.equal(rowToValuesStub.firstCall.args[0], existingRow);
+            t.same(rowToValuesStub.firstCall.args[0], updateRowData);
             t.equal(rowToValuesStub.firstCall.args[1], columns);
           }
         );
@@ -462,7 +476,6 @@ test("GoogleSheetsTable", async (t) => {
         t.test("updates the row in Google Sheets", async (t) => {
           const rowValues: any = [];
           rowToValuesStub.returns(rowValues);
-          existingRow._rowNumber = 7;
 
           const target = createInstance();
           try {

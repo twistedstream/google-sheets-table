@@ -1,4 +1,5 @@
 import { sheets_v4 } from "@googleapis/sheets";
+import { omit } from "lodash";
 
 import { track } from "./async-tracker";
 import { createClient } from "./client";
@@ -183,16 +184,19 @@ export class GoogleSheetsTable {
         throw new Error("Row not found");
       }
 
+      // clone existing row, removing metadata properties
+      const rowDataToUpdate: RowData = omit(existingRow, "_rowNumber");
+
       // update row values
       for (const key in rowUpdates) {
-        existingRow[key] = rowUpdates[key];
+        rowDataToUpdate[key] = rowUpdates[key];
       }
 
       // enforce constraints before update
-      enforceConstraints(rows, existingRow, columnConstraints);
+      enforceConstraints(rows, rowDataToUpdate, columnConstraints);
 
       // update row
-      const rowValues = rowToValues(existingRow, columns);
+      const rowValues = rowToValues(rowDataToUpdate, columns);
       const updateResult = await this.sheets.spreadsheets.values.update({
         ...this.commonGoogleSheetsParams,
         range: `${sheetName}!${existingRow._rowNumber}:${existingRow._rowNumber}`,
