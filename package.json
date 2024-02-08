@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "dev": "tsc --watch",
+    "example": "nodemon ./example.js",
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
     "format": "prettier --write .",
     "test": "rm -rf ./dist && tap --ts --reporter=spec"
@@ -42,7 +43,9 @@
     "@types/node": "^20.11.5",
     "@types/sinon": "^17.0.3",
     "@types/tap": "^15.0.7",
+    "dotenv": "^16.4.1",
     "fix-tsup-cjs": "^1.2.0",
+    "nodemon": "^3.0.3",
     "prettier": "^3.2.4",
     "sinon": "^17.0.1",
     "tap": "^16.3.0",
