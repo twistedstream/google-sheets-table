@@ -1,0 +1,44 @@
+# Build and deploy a new Docker image on each new tag
+
+name: Deploy
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - "*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          registry-url: "https://registry.npmjs.org/"
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Build documentation
+        uses: erikyo/tsdoc-action@v1
+        with:
+          source_dir: ./src/*
+          output_dir: ./docs
+          front_page: README.md
+
+      - name: Setup GH Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: "./docs"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
