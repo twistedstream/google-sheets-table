@@ -637,7 +637,7 @@ test("GoogleSheetsTable", async (t) => {
           "when the sheet exists, deletes the row in Google Sheets",
           async (t) => {
             const sheet = {
-              properties: { title: "bananas", index: "sheet-id" },
+              properties: { title: "bananas", sheetId: "sheet-id" },
             };
             getSpreadsheetStub.resolves({ data: { sheets: [sheet] } });
 
