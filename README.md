@@ -146,6 +146,8 @@ await table.deleteRow((r) => r.sku === "BUT1");
 // NOTE: throws if row not found
 ```
 
+See the [`example.js`](./example.js) for a full sample.
+
 ## API
 
 TODO: Link to future TypeDocs site (Issue [#22](https://github.com/twistedstream/google-sheets-table/issues/22))

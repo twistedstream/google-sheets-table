@@ -1,3 +1,7 @@
+// Steps to run:
+// 1. Create a .env file with the config values shown below
+// 2. Run continuously with `npm run example`
+
 require("dotenv").config();
 
 // const { GoogleSheetsTable } = require("google-sheets-table")
