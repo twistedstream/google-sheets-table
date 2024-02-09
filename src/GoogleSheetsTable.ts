@@ -308,7 +308,7 @@ export class GoogleSheetsTable {
       if (!sheet) {
         throw new Error(`Sheet with name '${sheetName}' not found`);
       }
-      const sheetId = assertValue(sheet.properties).index;
+      const { sheetId } = assertValue(sheet.properties);
 
       // delete the row
       await this.sheets.spreadsheets.batchUpdate({
