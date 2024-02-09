@@ -150,7 +150,7 @@ See the [`example.js`](./example.js) for a full sample.
 
 ## API
 
-TODO: Link to future TypeDocs site (Issue [#22](https://github.com/twistedstream/google-sheets-table/issues/22))
+Check it out 👉 [API](https://twistedstream.github.io/google-sheets-table)
 
 ## Contribution ideas
 

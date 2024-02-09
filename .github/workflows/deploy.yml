@@ -1,5 +1,3 @@
-# Build and deploy a new Docker image on each new tag
-
 name: Deploy
 
 on:

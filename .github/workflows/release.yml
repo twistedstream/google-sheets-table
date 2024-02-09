@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Log github.event.head_commit.author.username
-        run: echo "${{ github.event.head_commit.author.username }}"
-
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
