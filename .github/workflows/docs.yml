@@ -1,6 +1,4 @@
-# Build and deploy a new Docker image on each new tag
-
-name: Deploy
+name: Docs
 
 on:
   workflow_dispatch: {}
