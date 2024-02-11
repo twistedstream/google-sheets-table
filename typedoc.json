@@ -1,0 +1,10 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs",
+  "readme": "./DOC.md",
+  "excludeNotDocumented": true,
+  "excludePrivate": true,
+  "sourceLinkExternal": true,
+  "includeVersion": true
+}
