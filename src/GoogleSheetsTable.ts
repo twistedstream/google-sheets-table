@@ -101,10 +101,10 @@ export class GoogleSheetsTable {
    */
   async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }>;
   // implementation
-  async findRows(p?: SearchPredicate): Promise<{ rows: Row[] }> {
+  async findRows(
+    predicate: SearchPredicate = () => true
+  ): Promise<{ rows: Row[] }> {
     await track();
-
-    const predicate = p ? p : () => true;
 
     const { sheetName } = this.options;
     const { rows } = await openTable(
