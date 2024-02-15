@@ -167,17 +167,36 @@ test("GoogleSheetsTable", async (t) => {
         t.equal(openTableStub.firstCall.args[2], "bananas");
       });
 
-      t.test("returns expected table rows", async (t) => {
-        openTableStub.resolves({ rows: [row1, row2, row3] });
+      t.test(
+        "if a search predicate is provided, returns expected subset of table rows",
+        async (t) => {
+          openTableStub.resolves({ rows: [row1, row2, row3] });
 
-        const target = createInstance();
-        const result = await target.findRows((r: any) => r.age > 30);
+          const target = createInstance();
+          const result = await target.findRows((r: any) => r.age > 30);
 
-        t.ok(result.rows);
-        t.equal(result.rows.length, 2);
-        t.equal(result.rows[0], row1);
-        t.equal(result.rows[1], row3);
-      });
+          t.ok(result.rows);
+          t.equal(result.rows.length, 2);
+          t.equal(result.rows[0], row1);
+          t.equal(result.rows[1], row3);
+        }
+      );
+
+      t.test(
+        "if no search predicate is provided, returns all table rows",
+        async (t) => {
+          openTableStub.resolves({ rows: [row1, row2, row3] });
+
+          const target = createInstance();
+          const result = await target.findRows();
+
+          t.ok(result.rows);
+          t.equal(result.rows.length, 3);
+          t.equal(result.rows[0], row1);
+          t.equal(result.rows[1], row2);
+          t.equal(result.rows[2], row3);
+        }
+      );
     });
 
     t.test("#findRow", async (t) => {

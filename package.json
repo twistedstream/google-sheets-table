@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "dev": "tsc --watch",
-    "example": "nodemon ./example.js",
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
+    "example": "npm run build && nodemon ./example.js",
     "format": "prettier --write .",
     "test": "rm -rf ./dist && tap --ts --reporter=spec"
   },

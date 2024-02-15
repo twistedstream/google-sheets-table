@@ -86,14 +86,25 @@ export class GoogleSheetsTable {
   }
 
   /**
+   * Finds all rows within the table.
+   *
+   * @async
+   * @returns {Promise<{ rows: Row[] }>} The found rows.
+   */
+  async findRows(): Promise<{ rows: Row[] }>;
+  /**
    * Finds zero or more rows within the table.
    *
    * @async
    * @param {SearchPredicate} predicate The search function.
    * @returns {Promise<{ rows: Row[] }>} The found rows.
    */
-  async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }> {
+  async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }>;
+  // implementation
+  async findRows(p?: SearchPredicate): Promise<{ rows: Row[] }> {
     await track();
+
+    const predicate = p ? p : () => true;
 
     const { sheetName } = this.options;
     const { rows } = await openTable(

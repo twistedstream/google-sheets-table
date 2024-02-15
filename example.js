@@ -31,12 +31,22 @@ const table = new GoogleSheetsTable({
   console.log(row);
   // => { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" }
 
-  console.log("Finding rows by multiple keys:");
+  console.log("Finding multiple rows:");
   const { rows } = await table.findRows((r) => r.price < 2);
   console.log(rows);
   // => [
-  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" } },
-  //      { _rowNumber: 2, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" } }
+  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
+  //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" }
+  //    ]
+
+  console.log("Get all rows:");
+  const { rows: allRows } = await table.findRows();
+  console.log(allRows);
+  // => [
+  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
+  //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" },
+  //      { _rowNumber: 3, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
+  //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" },
   //    ]
 
   console.log("Finding rows by one or more keys:");
@@ -44,7 +54,7 @@ const table = new GoogleSheetsTable({
   console.log(rowsByKey);
   // => {
   //      APL1: { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" } },
-  //      EGG1: { _rowNumber: 5, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" } }
+  //      EGG1: { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" } }
   //    }
 
   console.log("Counting rows:");
@@ -71,7 +81,7 @@ const table = new GoogleSheetsTable({
   console.log(updatedRow);
   // => { _rowNumber: 6, id: 1005, sku: 'BUT1', name: 'Butter', quantity: 15, price: 3.5, department: "dairy" }
 
-  console.log("Deleting an existing row:");
+  console.log("Deleting an existing row");
   await table.deleteRow((r) => r.sku === "BUT1");
   // NOTE: throws if row not found
 })();
