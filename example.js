@@ -31,14 +31,6 @@ const table = new GoogleSheetsTable({
   console.log(row);
   // => { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" }
 
-  console.log("Finding multiple rows:");
-  const { rows } = await table.findRows((r) => r.price < 2);
-  console.log(rows);
-  // => [
-  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
-  //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" }
-  //    ]
-
   console.log("Get all rows:");
   const { rows: allRows } = await table.findRows();
   console.log(allRows);
@@ -46,7 +38,28 @@ const table = new GoogleSheetsTable({
   //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
   //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" },
   //      { _rowNumber: 3, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
-  //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" },
+  //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" }
+  //    ]
+
+  console.log("Finding specific rows:");
+  const { rows } = await table.findRows((r) => r.quantity < 50);
+  console.log(rows);
+  // => [
+  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: 'produce' },
+  //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.5, department: 'produce' },
+  //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Eggs', quantity: 25, price: 2.5, department: 'dairy' }
+  //    ]
+
+  console.log("Finding rows and sorting them:");
+  const { rows: sortedRows } = await table.findRows(
+    (r) => r.quantity < 50,
+    [{ asc: "department" }, { desc: "name" }]
+  );
+  console.log(sortedRows);
+  // => [
+  //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Eggs', quantity: 25, price: 2.5, department: 'dairy' },
+  //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.5, department: 'produce' },
+  //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: 'produce' }
   //    ]
 
   console.log("Finding rows by one or more keys:");

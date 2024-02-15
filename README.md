@@ -88,17 +88,6 @@ console.log(row);
 
 > The `_rowNumber` property is a metadata field identifying the sheet row number
 
-Finding multiple rows:
-
-```javascript
-const { rows } = await table.findRows((r) => r.price < 2);
-console.log(rows);
-// => [
-//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
-//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" }
-//    ]
-```
-
 Get all rows:
 
 ```javascript
@@ -109,6 +98,33 @@ console.log(allRows);
 //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" },
 //      { _rowNumber: 3, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
 //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" },
+//    ]
+```
+
+Finding specific rows:
+
+```javascript
+const { rows } = await table.findRows((r) => r.quantity < 50);
+console.log(rows);
+// => [
+//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: 'produce' },
+//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.5, department: 'produce' },
+//      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Eggs', quantity: 25, price: 2.5, department: 'dairy' }
+//    ]
+```
+
+Finding rows and sorting them:
+
+```javascript
+const { rows: sortedRows } = await table.findRows(
+  (r) => r.quantity < 50,
+  [{ asc: "department" }, { desc: "name" }]
+);
+console.log(sortedRows);
+// => [
+//      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Eggs', quantity: 25, price: 2.5, department: 'dairy' },
+//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.5, department: 'produce' },
+//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: 'produce' }
 //    ]
 ```
 
@@ -163,7 +179,7 @@ await table.deleteRow((r) => r.sku === "BUT1");
 // NOTE: throws if row not found
 ```
 
-See the [`example.js`](./example.js) for a full sample.
+See the [`example.js`](./example.js) for the full example.
 
 ## API
 
