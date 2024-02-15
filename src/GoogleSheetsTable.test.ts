@@ -35,6 +35,9 @@ const openTableStub = sinon.stub();
 const row1: Row = { username: "jim", age: 42, _rowNumber: 2 };
 const row2: Row = { username: "bob", age: 24, _rowNumber: 3 };
 const row3: Row = { username: "mary", age: 32, _rowNumber: 4 };
+const row4: Row = { username: "spencer", age: 24, _rowNumber: 5 };
+const allRows = [row1, row2, row3, row4];
+const columns = ["username", "age"];
 
 // helpers
 
@@ -170,7 +173,7 @@ test("GoogleSheetsTable", async (t) => {
       t.test(
         "if a search predicate is provided, returns expected subset of table rows",
         async (t) => {
-          openTableStub.resolves({ rows: [row1, row2, row3] });
+          openTableStub.resolves({ rows: allRows });
 
           const target = createInstance();
           const result = await target.findRows((r: any) => r.age > 30);
@@ -185,16 +188,110 @@ test("GoogleSheetsTable", async (t) => {
       t.test(
         "if no search predicate is provided, returns all table rows",
         async (t) => {
-          openTableStub.resolves({ rows: [row1, row2, row3] });
+          openTableStub.resolves({ rows: allRows });
 
           const target = createInstance();
           const result = await target.findRows();
 
           t.ok(result.rows);
-          t.equal(result.rows.length, 3);
+          t.equal(result.rows.length, 4);
           t.equal(result.rows[0], row1);
           t.equal(result.rows[1], row2);
           t.equal(result.rows[2], row3);
+          t.equal(result.rows[3], row4);
+        }
+      );
+
+      t.test(
+        "if ascending search is specified with an unknown column, throws expected error",
+        async (t) => {
+          openTableStub.resolves({
+            rows: allRows,
+            columns,
+          });
+
+          const target = createInstance();
+          t.rejects(async () => await target.findRows([{ asc: "foo" }]), {
+            message: "Sort column does not exist: foo",
+          });
+        }
+      );
+
+      t.test(
+        "if ascending search is specified, returns rows in expected order",
+        async (t) => {
+          openTableStub.resolves({
+            rows: allRows,
+            columns,
+          });
+
+          const target = createInstance();
+          const result = await target.findRows([{ asc: "age" }]);
+
+          t.ok(result.rows);
+          t.equal(result.rows.length, 4);
+          t.equal(result.rows[0], row2);
+          t.equal(result.rows[1], row4);
+          t.equal(result.rows[2], row3);
+          t.equal(result.rows[3], row1);
+        }
+      );
+
+      t.test(
+        "if descending search is specified with an unknown column, throws expected error",
+        async (t) => {
+          openTableStub.resolves({
+            rows: allRows,
+            columns,
+          });
+
+          const target = createInstance();
+          t.rejects(async () => await target.findRows([{ desc: "foo" }]), {
+            message: "Sort column does not exist: foo",
+          });
+        }
+      );
+
+      t.test(
+        "if descending search is specified, returns rows in expected order",
+        async (t) => {
+          openTableStub.resolves({
+            rows: allRows,
+            columns,
+          });
+
+          const target = createInstance();
+          const result = await target.findRows([{ desc: "age" }]);
+
+          t.ok(result.rows);
+          t.equal(result.rows.length, 4);
+          t.equal(result.rows[0], row1);
+          t.equal(result.rows[1], row3);
+          t.equal(result.rows[2], row2);
+          t.equal(result.rows[3], row4);
+        }
+      );
+
+      t.test(
+        "if multiple search columns are specified, returns rows in expected order",
+        async (t) => {
+          openTableStub.resolves({
+            rows: allRows,
+            columns,
+          });
+
+          const target = createInstance();
+          const result = await target.findRows([
+            { asc: "age" },
+            { desc: "username" },
+          ]);
+
+          t.ok(result.rows);
+          t.equal(result.rows.length, 4);
+          t.equal(result.rows[0], row4);
+          t.equal(result.rows[1], row2);
+          t.equal(result.rows[2], row3);
+          t.equal(result.rows[3], row1);
         }
       );
     });
@@ -213,7 +310,7 @@ test("GoogleSheetsTable", async (t) => {
       });
 
       t.test("returns expected table row", async (t) => {
-        openTableStub.resolves({ rows: [row1, row2, row3] });
+        openTableStub.resolves({ rows: allRows });
 
         const target = createInstance();
         const result = await target.findRow((r: any) => r.age > 30);
@@ -237,7 +334,7 @@ test("GoogleSheetsTable", async (t) => {
       });
 
       t.test("returns expected rows by key", async (t) => {
-        openTableStub.returns({ rows: [row1, row2, row3] });
+        openTableStub.returns({ rows: allRows });
 
         const target = createInstance();
         const result = await target.findKeyRows(

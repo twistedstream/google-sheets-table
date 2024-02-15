@@ -73,8 +73,23 @@ export type Row = {
  * @typedef {SearchPredicate}
  */
 export type SearchPredicate = (
+  /**
+   * A row to examine.
+   *
+   * @type {Row}
+   */
   row: Row,
+  /**
+   * The index of the row in all of the rows.
+   *
+   * @type {Row}
+   */
   index: number,
+  /**
+   * The full set of rows.
+   *
+   * @type {Row}
+   */
   array: Row[]
 ) => boolean;
 
@@ -89,7 +104,6 @@ export type KeyColumnSelector<T extends keyof any> = (row: Row) => T;
 
 /**
  * Contains column constraint expressions.
- * @date 2/2/2024 - 3:44:38 PM
  *
  * @export
  * @typedef {ColumnConstraints}
@@ -102,6 +116,32 @@ export type ColumnConstraints = {
    */
   uniques?: string[];
 };
+
+/**
+ * Specifies a single column sort.
+ *
+ * @export
+ * @typedef {ColumnSortSpec}
+ */
+export type ColumnSortSpec =
+  | {
+      /**
+       * The name of the column to sort ascending.
+       *
+       * @type {string}
+       */
+      asc: string;
+      desc?: never;
+    }
+  | {
+      /**
+       * The name of the column to sort descending.
+       *
+       * @type {string}
+       */
+      desc: string;
+      asc?: never;
+    };
 
 export type Range = {
   sheet: string;

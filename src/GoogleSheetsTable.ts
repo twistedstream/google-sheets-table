@@ -8,6 +8,7 @@ import { assertValue } from "./error";
 import { processUpdatedData, rowToValues, valuesToRow } from "./row";
 import { enforceConstraints, openTable } from "./table";
 import {
+  ColumnSortSpec,
   GoogleSheetsTableOptions,
   KeyColumnSelector,
   Row,
@@ -89,9 +90,17 @@ export class GoogleSheetsTable {
    * Finds all rows within the table.
    *
    * @async
-   * @returns {Promise<{ rows: Row[] }>} The found rows.
+   * @returns {Promise<{ rows: Row[] }>} All of the rows.
    */
   async findRows(): Promise<{ rows: Row[] }>;
+  /**
+   * Finds all rows within the table and sorts them.
+   *
+   * @async
+   * @param {ColumnSortSpec[]} sorting The columns to sort by.
+   * @returns {Promise<{ rows: Row[] }>} All of the rows, sorted.
+   */
+  async findRows(sorting: ColumnSortSpec[]): Promise<{ rows: Row[] }>;
   /**
    * Finds zero or more rows within the table.
    *
@@ -100,19 +109,58 @@ export class GoogleSheetsTable {
    * @returns {Promise<{ rows: Row[] }>} The found rows.
    */
   async findRows(predicate: SearchPredicate): Promise<{ rows: Row[] }>;
+  /**
+   * Finds zero or more rows within the table and sorts them.
+   *
+   * @async
+   * @param {SearchPredicate} predicate The search function.
+   * @param {ColumnSortSpec[]} sorting The columns to sort by.
+   * @returns {Promise<{ rows: Row[] }>} The found rows, sorted.
+   */
+  async findRows(
+    predicate: SearchPredicate,
+    sorting: ColumnSortSpec[]
+  ): Promise<{ rows: Row[] }>;
   // implementation
-  async findRows(p?: SearchPredicate): Promise<{ rows: Row[] }> {
+  async findRows(
+    arg1?: SearchPredicate | ColumnSortSpec[],
+    arg2?: ColumnSortSpec[]
+  ): Promise<{ rows: Row[] }> {
     await track();
 
-    const predicate = p ? p : () => true;
+    const predicate =
+      arg1 === undefined || Array.isArray(arg1) ? () => true : arg1;
+    const sorting = Array.isArray(arg1) ? arg1 : arg2 ?? [];
 
     const { sheetName } = this.options;
-    const { rows } = await openTable(
+    const { rows, columns } = await openTable(
       this.sheets,
       this.options.spreadsheetId,
       sheetName
     );
     const foundRows = rows.filter(predicate);
+
+    if (sorting.length > 0) {
+      for (const sort of sorting.toReversed()) {
+        const column = sort.asc ?? sort.desc;
+        if (!columns.includes(column)) {
+          throw new Error(`Sort column does not exist: ${column}`);
+        }
+
+        foundRows.sort((rowA, rowB) => {
+          const valueA = rowA[column];
+          const valueB = rowB[column];
+
+          if (valueA > valueB) {
+            return sort.asc ? 1 : -1;
+          } else if (valueA < valueB) {
+            return sort.asc ? -1 : 1;
+          } else {
+            return 0;
+          }
+        });
+      }
+    }
 
     return { rows: foundRows };
   }
