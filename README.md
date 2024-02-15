@@ -59,7 +59,9 @@ const table = new GoogleSheetsTable({
 
 The `credentials` object is a Google [`JWTInput`](https://github.com/googleapis/google-auth-library-nodejs/blob/3b19e9cfa0e7ca4ffd97fa0ebd96f065286573dc/src/auth/credentials.ts#L69) interface which supports the use of Google service accounts. To create a service account and give it the necessary access to your document, do the following:
 
-1. Create a service account in the [Credentials](https://console.cloud.google.com/apis/credentials) section of the Google Cloud Console
+1. If you don't already have one, [create a new project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) in the Google Cloud Console
+1. In the project, enable the [Google Sheets API](https://console.cloud.google.com/marketplace/product/google/sheets.googleapis.com)
+1. Create a service account in [IAM Credentials](https://console.cloud.google.com/apis/credentials)
 1. Download the JSON key and extract the `client_email` and `private_key` properties
 1. Export them in your environment as shown above
 1. Share access to your document, giving the service account (identified by its email address) either `Viewer` access (if your app only needs read-only access) or `Editor` access (if it needs full read/write)
@@ -67,6 +69,8 @@ The `credentials` object is a Google [`JWTInput`](https://github.com/googleapis/
    ![share access](./media/share-access.png)
 
 The `sheetName` property identifies which sheet in the Google Sheets document will be used as the table.
+
+The `columnConstraints` property specifies column constraints that will be enforced when new rows are inserted or existing rows are updated.
 
 ## Usage
 
