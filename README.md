@@ -94,8 +94,21 @@ Finding multiple rows:
 const { rows } = await table.findRows((r) => r.price < 2);
 console.log(rows);
 // => [
-//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" } },
-//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" } }
+//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
+//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" }
+//    ]
+```
+
+Get all rows:
+
+```javascript
+const { rows: allRows } = await table.findRows();
+console.log(allRows);
+// => [
+//      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
+//      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" },
+//      { _rowNumber: 3, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
+//      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" },
 //    ]
 ```
 
@@ -115,7 +128,7 @@ Counting rows:
 ```typescript
 const count = await table.countRows();
 console.log(count);
-// => 3
+// => 4
 ```
 
 Inserting a new row:
