@@ -20,8 +20,16 @@ test("error", async (t) => {
     t.test("#constructor", async (t) => {
       t.test("creates expected error", async (t) => {
         const violations: ConstraintViolation[] = [
-          { type: "unique", description: "A row already exists with id = 42" },
-          { type: "unique", description: "A row already exists with foo = 24" },
+          {
+            type: "unique",
+            column: "id",
+            description: "A row already exists with id = 42",
+          },
+          {
+            type: "unique",
+            column: "foo",
+            description: "A row already exists with foo = 24",
+          },
         ];
         const error = new ConstraintViolationsError(violations);
 

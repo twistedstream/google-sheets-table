@@ -54,6 +54,7 @@ export function enforceConstraints(
       ) {
         violations.push({
           type: "unique",
+          column,
           description: `A row already exists with ${column} = ${value}`,
         });
       }

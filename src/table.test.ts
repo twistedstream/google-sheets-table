@@ -151,10 +151,12 @@ test("table", async (t) => {
             t.same(error?.violations, [
               {
                 type: "unique",
+                column: "id",
                 description: "A row already exists with id = u002",
               },
               {
                 type: "unique",
+                column: "username",
                 description: "A row already exists with username = jim",
               },
             ]);
@@ -203,10 +205,12 @@ test("table", async (t) => {
             t.same(error?.violations, [
               {
                 type: "unique",
+                column: "id",
                 description: "A row already exists with id = u001",
               },
               {
                 type: "unique",
+                column: "username",
                 description: "A row already exists with username = bob",
               },
             ]);

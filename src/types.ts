@@ -167,6 +167,13 @@ export type ConstraintViolation = {
   type: "unique";
 
   /**
+   * The name of the column where the constraint violation occurred.
+   *
+   * @type {string}
+   */
+  column: string;
+
+  /**
    * A description of what the violation is and why it was violated.
    *
    * @type {string}
