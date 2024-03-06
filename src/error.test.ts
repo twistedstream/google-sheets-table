@@ -1,6 +1,7 @@
 import { test } from "tap";
 
-import { ErrorWithData, assertValue } from "./error";
+import { ConstraintViolationsError, ErrorWithData, assertValue } from "./error";
+import { ConstraintViolation } from "./types";
 
 test("error", async (t) => {
   t.test("ErrorWithData", async (t) => {
@@ -11,6 +12,26 @@ test("error", async (t) => {
 
         t.equal(error.message, `Some message {"foo":"bar"}`);
         t.equal(error.data, data);
+      });
+    });
+  });
+
+  t.test("ConstraintViolationsError", async (t) => {
+    t.test("#constructor", async (t) => {
+      t.test("creates expected error", async (t) => {
+        const violations: ConstraintViolation[] = [
+          { type: "unique", description: "A row already exists with id = 42" },
+          { type: "unique", description: "A row already exists with foo = 24" },
+        ];
+        const error = new ConstraintViolationsError(violations);
+
+        t.equal(
+          error.message,
+          `There are constraint violations:
+A row already exists with id = 42
+A row already exists with foo = 24`,
+        );
+        t.equal(error.violations, violations);
       });
     });
   });

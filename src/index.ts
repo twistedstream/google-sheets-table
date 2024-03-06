@@ -1,6 +1,8 @@
 import { GoogleSheetsTable } from "./GoogleSheetsTable";
+import { ConstraintViolationsError } from "./error";
 import {
   ColumnConstraints,
+  ConstraintViolation,
   GoogleSheetsTableOptions,
   KeyColumnSelector,
   Row,
@@ -9,11 +11,12 @@ import {
 } from "./types";
 
 // classes, functions, data
-export { GoogleSheetsTable };
+export { ConstraintViolationsError, GoogleSheetsTable };
 
 // types
 export {
   ColumnConstraints,
+  ConstraintViolation,
   GoogleSheetsTableOptions,
   KeyColumnSelector,
   Row,
