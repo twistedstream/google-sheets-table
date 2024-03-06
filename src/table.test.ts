@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import sinon from "sinon";
 import { test } from "tap";
+import { ConstraintViolationsError } from "./error";
 import { ColumnConstraints } from "./types";
 
 // test objects
@@ -138,11 +139,25 @@ test("table", async (t) => {
             testRow.id = "u002";
             testRow.username = "jim";
 
-            t.throws(() => enforceConstraints(copy, testRow, constraints), {
-              message: `There are constraint violations:
-A row already exists with id = 'u002'
-A row already exists with username = 'jim'`,
-            });
+            let error: ConstraintViolationsError | undefined;
+            try {
+              enforceConstraints(copy, testRow, constraints);
+            } catch (err) {
+              error = err as ConstraintViolationsError;
+            }
+
+            t.ok(error);
+            t.equal(error?.name, "ConstraintViolationsError");
+            t.same(error?.violations, [
+              {
+                type: "unique",
+                description: "A row already exists with id = u002",
+              },
+              {
+                type: "unique",
+                description: "A row already exists with username = jim",
+              },
+            ]);
           },
         );
       });
@@ -176,11 +191,25 @@ A row already exists with username = 'jim'`,
               age: 32,
             };
 
-            t.throws(() => enforceConstraints(copy, testRow, constraints), {
-              message: `There are constraint violations:
-A row already exists with id = 'u001'
-A row already exists with username = 'bob'`,
-            });
+            let error: ConstraintViolationsError | undefined;
+            try {
+              enforceConstraints(copy, testRow, constraints);
+            } catch (err) {
+              error = err as ConstraintViolationsError;
+            }
+
+            t.ok(error);
+            t.equal(error?.name, "ConstraintViolationsError");
+            t.same(error?.violations, [
+              {
+                type: "unique",
+                description: "A row already exists with id = u001",
+              },
+              {
+                type: "unique",
+                description: "A row already exists with username = bob",
+              },
+            ]);
           },
         );
       });
