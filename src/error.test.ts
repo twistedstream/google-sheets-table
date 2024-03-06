@@ -25,6 +25,7 @@ test("error", async (t) => {
         ];
         const error = new ConstraintViolationsError(violations);
 
+        t.equal(error.name, "ConstraintViolationsError");
         t.equal(
           error.message,
           `There are constraint violations:
