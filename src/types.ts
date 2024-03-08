@@ -90,7 +90,7 @@ export type SearchPredicate = (
    *
    * @type {Row}
    */
-  array: Row[]
+  array: Row[],
 ) => boolean;
 
 /**
@@ -149,4 +149,34 @@ export type Range = {
   startRow: number;
   endColumn: string;
   endRow: number;
+};
+
+/**
+ * Represents an instance of a table constraint violation.
+ *
+ * @export
+ * @typedef {ConstraintViolation}
+ */
+export type ConstraintViolation = {
+  /**
+   * The type of constraint violation.
+   * @date 3/6/2024 - 8:43:03 AM
+   *
+   * @type {"unique"}
+   */
+  type: "unique";
+
+  /**
+   * The name of the column where the constraint violation occurred.
+   *
+   * @type {string}
+   */
+  column: string;
+
+  /**
+   * A description of what the violation is and why it was violated.
+   *
+   * @type {string}
+   */
+  description: string;
 };

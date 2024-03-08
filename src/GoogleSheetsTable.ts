@@ -4,7 +4,7 @@ import { omit } from "lodash";
 import { track } from "./async-tracker";
 import { createClient } from "./client";
 import { lock } from "./concurrency";
-import { assertValue } from "./error";
+import { ConstraintViolationsError, assertValue } from "./error";
 import { processUpdatedData, rowToValues, valuesToRow } from "./row";
 import { enforceConstraints, openTable } from "./table";
 import {
@@ -119,12 +119,12 @@ export class GoogleSheetsTable {
    */
   async findRows(
     predicate: SearchPredicate,
-    sorting: ColumnSortSpec[]
+    sorting: ColumnSortSpec[],
   ): Promise<{ rows: Row[] }>;
   // implementation
   async findRows(
     arg1?: SearchPredicate | ColumnSortSpec[],
-    arg2?: ColumnSortSpec[]
+    arg2?: ColumnSortSpec[],
   ): Promise<{ rows: Row[] }> {
     await track();
 
@@ -136,7 +136,7 @@ export class GoogleSheetsTable {
     const { rows, columns } = await openTable(
       this.sheets,
       this.options.spreadsheetId,
-      sheetName
+      sheetName,
     );
     const foundRows = rows.filter(predicate);
 
@@ -179,7 +179,7 @@ export class GoogleSheetsTable {
     const { rows } = await openTable(
       this.sheets,
       this.options.spreadsheetId,
-      sheetName
+      sheetName,
     );
     const row = rows.find(predicate);
 
@@ -197,7 +197,7 @@ export class GoogleSheetsTable {
    */
   async findKeyRows<T extends keyof any>(
     selector: KeyColumnSelector<T>,
-    keys: T[]
+    keys: T[],
   ): Promise<{ rowsByKey: Record<T, Row> }> {
     await track();
 
@@ -217,7 +217,7 @@ export class GoogleSheetsTable {
         p[selector(c)] = c;
         return p;
       },
-      <Record<T, Row>>{}
+      <Record<T, Row>>{},
     );
 
     return { rowsByKey: rowsByValue };
@@ -229,6 +229,7 @@ export class GoogleSheetsTable {
    * @async
    * @param {RowData} newRow An object containing the row data to insert.
    * @returns {Promise<{ insertedRow: Row }>} The inserted row.
+   * @throws {ConstraintViolationsError} Inserted row violates column constraints
    */
   async insertRow(newRow: RowData): Promise<{ insertedRow: Row }> {
     const { spreadsheetId, sheetName, columnConstraints } = this.options;
@@ -239,7 +240,7 @@ export class GoogleSheetsTable {
       const { columns, rows } = await openTable(
         this.sheets,
         spreadsheetId,
-        sheetName
+        sheetName,
       );
 
       // enforce constraint before insert
@@ -260,12 +261,12 @@ export class GoogleSheetsTable {
       const { updatedRowValues, updatedRowNumber } = processUpdatedData(
         assertValue(assertValue(appendResult.data.updates).updatedData),
         sheetName,
-        rowValues
+        rowValues,
       );
       const insertedRow = valuesToRow(
         updatedRowValues,
         columns,
-        updatedRowNumber
+        updatedRowNumber,
       );
       return { insertedRow };
     });
@@ -279,10 +280,11 @@ export class GoogleSheetsTable {
    * @param {RowData} rowUpdates An object containing the data to update.
    * @returns {Promise<{ updatedRow: Row }>} The updated row.
    * @throws {Error} Row is not found
+   * @throws {ConstraintViolationsError} Row change violates column constraints
    */
   async updateRow(
     predicate: SearchPredicate,
-    rowUpdates: RowData
+    rowUpdates: RowData,
   ): Promise<{ updatedRow: Row }> {
     const { spreadsheetId, sheetName, columnConstraints } = this.options;
 
@@ -292,7 +294,7 @@ export class GoogleSheetsTable {
       const { columns, rows } = await openTable(
         this.sheets,
         spreadsheetId,
-        sheetName
+        sheetName,
       );
 
       // find existing row
@@ -326,12 +328,12 @@ export class GoogleSheetsTable {
       const { updatedRowValues, updatedRowNumber } = processUpdatedData(
         assertValue(updateResult.data.updatedData),
         sheetName,
-        rowValues
+        rowValues,
       );
       const updatedRow = valuesToRow(
         updatedRowValues,
         columns,
-        updatedRowNumber
+        updatedRowNumber,
       );
       return { updatedRow };
     });
@@ -362,7 +364,7 @@ export class GoogleSheetsTable {
       // get sheet ID
       const spreadsheet = await this.sheets.spreadsheets.get({ spreadsheetId });
       const sheet = assertValue(spreadsheet.data.sheets).find(
-        (sheet) => assertValue(sheet.properties).title === sheetName
+        (sheet) => assertValue(sheet.properties).title === sheetName,
       );
       if (!sheet) {
         throw new Error(`Sheet with name '${sheetName}' not found`);
