@@ -2,7 +2,7 @@
 
 ![google-sheets-table banner](./media/banner.svg)
 
-![Release](https://img.shields.io/npm/v/google-sheets-table)
+[![Release](https://img.shields.io/npm/v/google-sheets-table)](https://www.npmjs.com/package/google-sheets-table)
 [![build](https://github.com/twistedstream/google-sheets-table/actions/workflows/build.yml/badge.svg)](https://github.com/twistedstream/google-sheets-table/actions)
 ![Downloads](https://img.shields.io/npm/dw/google-sheets-table)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
@@ -118,7 +118,7 @@ Finding rows and sorting them:
 ```javascript
 const { rows: sortedRows } = await table.findRows(
   (r) => r.quantity < 50,
-  [{ asc: "department" }, { desc: "name" }]
+  [{ asc: "department" }, { desc: "name" }],
 );
 console.log(sortedRows);
 // => [

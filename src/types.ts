@@ -160,7 +160,6 @@ export type Range = {
 export type ConstraintViolation = {
   /**
    * The type of constraint violation.
-   * @date 3/6/2024 - 8:43:03 AM
    *
    * @type {"unique"}
    */
