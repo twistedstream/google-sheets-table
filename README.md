@@ -96,7 +96,7 @@ console.log(allRows);
 // => [
 //      { _rowNumber: 2, id: 1001, sku: 'APL1', name: 'Apple', quantity: 10, price: 1.75, department: "produce" },
 //      { _rowNumber: 3, id: 1002, sku: 'BAN1', name: 'Banana', quantity: 11, price: 1.50, department: "produce" },
-//      { _rowNumber: 3, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
+//      { _rowNumber: 4, id: 1003, sku: 'TP1', name: 'Toilet paper', quantity: 99, price: 5.50, department: "home" },
 //      { _rowNumber: 5, id: 1004, sku: 'EGG1', name: 'Banana', quantity: 25, price: 2.50, department: "dairy" },
 //    ]
 ```
@@ -187,7 +187,7 @@ Check it out 👉 [API](https://twistedstream.github.io/google-sheets-table)
 
 ## Contribution ideas
 
-- [ ] Improve performance with larger table by not having to download the entire table for each operation
+- [ ] Improve performance with larger tables by not having to download the entire table for each operation
 - [ ] Add support for batch operations
 - [ ] Support concurrency locking across processes
 
