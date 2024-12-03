@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import { test } from "tap";
+import { t, Test } from "tap";
 
 // test objects
 
@@ -8,8 +8,8 @@ class MockConstraintViolationsError {}
 
 // helpers
 
-function importModule(test: Tap.Test) {
-  return test.mock("./index", {
+function importModule(t: Test) {
+  return t.mockRequire("./index", {
     "./GoogleSheetsTable": {
       GoogleSheetsTable: MockGoogleSheetsTable,
     },
@@ -21,7 +21,7 @@ function importModule(test: Tap.Test) {
 
 // tests
 
-test("index", async (t) => {
+t.test("index", async (t) => {
   t.beforeEach(async () => {
     sinon.resetBehavior();
     sinon.resetHistory();

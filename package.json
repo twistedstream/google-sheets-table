@@ -17,7 +17,7 @@
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
     "example": "npm run build && nodemon ./example.js",
     "format": "prettier --write .",
-    "test": "rm -rf ./dist && tap --ts --reporter=spec"
+    "test": "rm -rf ./dist && tap run"
   },
   "prepublish": "tsc",
   "repository": {
@@ -41,13 +41,12 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.17.9",
     "@types/sinon": "^17.0.3",
-    "@types/tap": "^15.0.7",
     "dotenv": "^16.4.1",
     "fix-tsup-cjs": "^1.2.0",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.4",
     "sinon": "^17.0.1",
-    "tap": "^16.3.0",
+    "tap": "^21.0.1",
     "ts-node": "^10.9.2",
     "tsup": "^8.0.1",
     "typedoc": "^0.27.2",

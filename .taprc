@@ -1,0 +1,2 @@
+coverage-map: code-coverage-map.js
+output-file: .tap/test-results/full.tap

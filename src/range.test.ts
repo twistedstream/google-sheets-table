@@ -1,8 +1,8 @@
-import { test } from "tap";
+import { t } from "tap";
 
 import { parseRange } from "./range";
 
-test("range", async (t) => {
+t.test("range", async (t) => {
   t.test("#parseRange", async (t) => {
     t.test(
       "if range is not the correct format, throws expected error",

@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import { test } from "tap";
+import { t, Test } from "tap";
 
 // test objects
 
@@ -18,15 +18,15 @@ class MockMutex {
 
 // helpers
 
-function importModule(test: Tap.Test) {
-  return test.mock("./concurrency", {
+function importModule(t: Test) {
+  return t.mockRequire("./concurrency", {
     "async-mutex": { Mutex: MockMutex },
   });
 }
 
 // tests
 
-test("concurrency", async (t) => {
+t.test("concurrency", async (t) => {
   t.beforeEach(async () => {
     sinon.resetBehavior();
     sinon.resetHistory();

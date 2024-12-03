@@ -1,1 +1,1 @@
-module.exports = (file) => file.replace(/\.test\.ts$/, ".ts");
+module.exports = (testFile) => testFile.replace(/\.test\.ts$/, ".ts");

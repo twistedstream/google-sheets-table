@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import { test } from "tap";
+import { t, Test } from "tap";
 
 // test objects
 
@@ -7,15 +7,15 @@ const parseRangeStub = sinon.stub();
 
 // helpers
 
-function importModule(test: Tap.Test) {
-  return test.mock("./row", {
+function importModule(test: Test) {
+  return test.mockRequire("./row", {
     "./range": {
       parseRange: parseRangeStub,
     },
   });
 }
 
-test("row", async (t) => {
+t.test("row", async (t) => {
   t.beforeEach(async () => {
     sinon.resetBehavior();
     sinon.resetHistory();
@@ -30,7 +30,7 @@ test("row", async (t) => {
         const result = valuesToRow(
           ["bob", "smith", 42],
           ["first_name", "last_name", "age"],
-          7
+          7,
         );
 
         t.match(result, {
@@ -39,7 +39,7 @@ test("row", async (t) => {
           age: 42,
           _rowNumber: 7,
         });
-      }
+      },
     );
   });
 
@@ -58,14 +58,14 @@ test("row", async (t) => {
                 age: 42,
               },
               ["last_name", "favorite_color"],
-              7
+              7,
             ),
           {
             message:
               "Table columns missing that exist as row properties: first_name, age",
-          }
+          },
         );
-      }
+      },
     );
 
     t.test(
@@ -78,11 +78,11 @@ test("row", async (t) => {
             age: 42,
           },
           ["first_name", "last_name", "age"],
-          7
+          7,
         );
 
         t.match(result, ["bob", "smith", 42]);
-      }
+      },
     );
   });
 
@@ -97,11 +97,11 @@ test("row", async (t) => {
           processUpdatedData(
             { range: undefined, values: [] },
             "bananas",
-            submittedRowValues
+            submittedRowValues,
           ),
         {
           message: "Updated value range has empty range",
-        }
+        },
       );
     });
 
@@ -111,11 +111,11 @@ test("row", async (t) => {
           processUpdatedData(
             { range: "range-value-ignored", values: undefined },
             "bananas",
-            submittedRowValues
+            submittedRowValues,
           ),
         {
           message: "Updated value range has empty values",
-        }
+        },
       );
     });
 
@@ -125,11 +125,11 @@ test("row", async (t) => {
           processUpdatedData(
             { range: "range-value-ignored", values: [[], [], []] },
             "bananas",
-            submittedRowValues
+            submittedRowValues,
           ),
         {
           message: "Expected one row of values, but instead got 3",
-        }
+        },
       );
     });
 
@@ -147,7 +147,7 @@ test("row", async (t) => {
                     values: [["Bob", "smith", 43]],
                   },
                   "bananas",
-                  submittedRowValues
+                  submittedRowValues,
                 ),
               {
                 message:
@@ -157,9 +157,9 @@ test("row", async (t) => {
                   true,
                   { submitted: 42, updated: 43 },
                 ],
-              }
+              },
             );
-          }
+          },
         );
 
         t.test(
@@ -173,7 +173,7 @@ test("row", async (t) => {
                   values: [[...submittedRowValues, undefined]],
                 },
                 "bananas",
-                [...submittedRowValues, ""]
+                [...submittedRowValues, ""],
               );
             } catch (err) {
               error = err;
@@ -181,9 +181,9 @@ test("row", async (t) => {
 
             t.not(
               error.message,
-              "One or more updated row values don't match corresponding submitted values"
+              "One or more updated row values don't match corresponding submitted values",
             );
-          }
+          },
         );
 
         t.test(
@@ -197,7 +197,7 @@ test("row", async (t) => {
                   values: [[...submittedRowValues, ""]],
                 },
                 "bananas",
-                [...submittedRowValues, undefined]
+                [...submittedRowValues, undefined],
               );
             } catch (err) {
               error = err;
@@ -205,11 +205,11 @@ test("row", async (t) => {
 
             t.not(
               error.message,
-              "One or more updated row values don't match corresponding submitted values"
+              "One or more updated row values don't match corresponding submitted values",
             );
-          }
+          },
         );
-      }
+      },
     );
 
     t.test("when examining the updated range", async (t) => {
@@ -226,15 +226,15 @@ test("row", async (t) => {
                   values: [[...submittedRowValues]],
                 },
                 "bananas",
-                [...submittedRowValues]
+                [...submittedRowValues],
               ),
 
             {
               message:
                 "Updated range sheet name 'apples' doesn't match submitted sheet name 'bananas'",
-            }
+            },
           );
-        }
+        },
       );
 
       t.test(
@@ -250,14 +250,14 @@ test("row", async (t) => {
                   values: [[...submittedRowValues]],
                 },
                 "bananas",
-                [...submittedRowValues]
+                [...submittedRowValues],
               ),
 
             {
               message: "Updated range start row (6) doesn't match end row (7)",
-            }
+            },
           );
-        }
+        },
       );
     });
 
@@ -270,7 +270,7 @@ test("row", async (t) => {
           values: [[...submittedRowValues]],
         },
         "bananas",
-        [...submittedRowValues]
+        [...submittedRowValues],
       );
 
       t.match(result, {

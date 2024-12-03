@@ -1,6 +1,6 @@
 import { cloneDeep, omit } from "lodash";
 import sinon from "sinon";
-import { test } from "tap";
+import { t, Test } from "tap";
 
 import { GoogleSheetsTable } from "./GoogleSheetsTable";
 import { Row } from "./types";
@@ -41,8 +41,8 @@ const columns = ["username", "age"];
 
 // helpers
 
-function importModule(test: Tap.Test) {
-  return test.mock("./GoogleSheetsTable", {
+function importModule(t: Test) {
+  return t.mockRequire("./GoogleSheetsTable", {
     "./async-tracker": { track: trackStub },
     "./client": {
       createClient: createClientStub,
@@ -61,7 +61,7 @@ function importModule(test: Tap.Test) {
 
 // tests
 
-test("GoogleSheetsTable", async (t) => {
+t.test("GoogleSheetsTable", async (t) => {
   t.beforeEach(async () => {
     sinon.resetBehavior();
     sinon.resetHistory();
@@ -182,7 +182,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(result.rows.length, 2);
           t.equal(result.rows[0], row1);
           t.equal(result.rows[1], row3);
-        }
+        },
       );
 
       t.test(
@@ -199,7 +199,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(result.rows[1], row2);
           t.equal(result.rows[2], row3);
           t.equal(result.rows[3], row4);
-        }
+        },
       );
 
       t.test(
@@ -214,7 +214,7 @@ test("GoogleSheetsTable", async (t) => {
           t.rejects(async () => await target.findRows([{ asc: "foo" }]), {
             message: "Sort column does not exist: foo",
           });
-        }
+        },
       );
 
       t.test(
@@ -234,7 +234,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(result.rows[1], row4);
           t.equal(result.rows[2], row3);
           t.equal(result.rows[3], row1);
-        }
+        },
       );
 
       t.test(
@@ -249,7 +249,7 @@ test("GoogleSheetsTable", async (t) => {
           t.rejects(async () => await target.findRows([{ desc: "foo" }]), {
             message: "Sort column does not exist: foo",
           });
-        }
+        },
       );
 
       t.test(
@@ -269,7 +269,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(result.rows[1], row3);
           t.equal(result.rows[2], row2);
           t.equal(result.rows[3], row4);
-        }
+        },
       );
 
       t.test(
@@ -292,7 +292,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(result.rows[1], row2);
           t.equal(result.rows[2], row3);
           t.equal(result.rows[3], row1);
-        }
+        },
       );
     });
 
@@ -339,7 +339,7 @@ test("GoogleSheetsTable", async (t) => {
         const target = createInstance();
         const result = await target.findKeyRows(
           (r: any) => r.username,
-          ["jim", "mary"]
+          ["jim", "mary"],
         );
 
         t.ok(result);
@@ -394,7 +394,7 @@ test("GoogleSheetsTable", async (t) => {
           t.ok(rowToValuesStub.called);
           t.equal(rowToValuesStub.firstCall.args[0], newRow);
           t.equal(rowToValuesStub.firstCall.args[1], columns);
-        }
+        },
       );
 
       t.test("appends the new row in Google Sheets", async (t) => {
@@ -444,7 +444,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(processUpdatedDataStub.firstCall.args[0], updatedData);
           t.equal(processUpdatedDataStub.firstCall.args[1], "bananas");
           t.equal(processUpdatedDataStub.firstCall.args[2], rowValues);
-        }
+        },
       );
 
       t.test(
@@ -472,7 +472,7 @@ test("GoogleSheetsTable", async (t) => {
           t.equal(valuesToRowStub.firstCall.args[0], updatedRowValues);
           t.equal(valuesToRowStub.firstCall.args[1], columns);
           t.equal(valuesToRowStub.firstCall.args[2], updatedRowNumber);
-        }
+        },
       );
 
       t.test("returns the inserted row", async (t) => {
@@ -564,9 +564,9 @@ test("GoogleSheetsTable", async (t) => {
             t.equal(enforceConstraintsStub.firstCall.args[1], existingRow);
             t.equal(
               enforceConstraintsStub.firstCall.args[2],
-              columnConstraints
+              columnConstraints,
             );
-          }
+          },
         );
 
         t.test(
@@ -586,7 +586,7 @@ test("GoogleSheetsTable", async (t) => {
               age: 42,
             });
             t.equal(rowToValuesStub.firstCall.args[1], columns);
-          }
+          },
         );
 
         t.test("updates the row in Google Sheets", async (t) => {
@@ -631,7 +631,7 @@ test("GoogleSheetsTable", async (t) => {
             t.equal(processUpdatedDataStub.firstCall.args[0], updatedData);
             t.equal(processUpdatedDataStub.firstCall.args[1], "bananas");
             t.equal(processUpdatedDataStub.firstCall.args[2], rowValues);
-          }
+          },
         );
 
         t.test(
@@ -655,7 +655,7 @@ test("GoogleSheetsTable", async (t) => {
             t.equal(valuesToRowStub.firstCall.args[0], updatedRowValues);
             t.equal(valuesToRowStub.firstCall.args[1], columns);
             t.equal(valuesToRowStub.firstCall.args[2], updatedRowNumber);
-          }
+          },
         );
 
         t.test("returns the updated row", async (t) => {
@@ -746,7 +746,7 @@ test("GoogleSheetsTable", async (t) => {
             t.rejects(() => target.deleteRow(() => true), {
               message: "Sheet with name 'bananas' not found",
             });
-          }
+          },
         );
 
         t.test(
@@ -778,7 +778,7 @@ test("GoogleSheetsTable", async (t) => {
                 ],
               },
             });
-          }
+          },
         );
       });
     });
@@ -834,7 +834,7 @@ test("GoogleSheetsTable", async (t) => {
         // calls should complete in reverse order (no serialization)
         const expected = [...labels].reverse();
         t.same(calls, expected, `expected call order: ${expected}`);
-      }
+      },
     );
 
     t.test(
@@ -861,7 +861,7 @@ test("GoogleSheetsTable", async (t) => {
         // calls should complete in same order they were made (serialization)
         const expected = [...labels];
         t.same(calls, expected, `expected call order: ${expected}`);
-      }
+      },
     );
 
     t.test("write methods DO NOT serialize across spreadsheets", async (t) => {
