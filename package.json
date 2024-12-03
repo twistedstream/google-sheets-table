@@ -17,6 +17,7 @@
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
     "example": "npm run build && nodemon ./example.js",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "rm -rf ./dist && tap run"
   },
   "prepublish": "tsc",
@@ -44,7 +45,7 @@
     "dotenv": "^16.4.7",
     "fix-tsup-cjs": "^1.2.0",
     "nodemon": "^3.1.7",
-    "prettier": "^3.2.4",
+    "prettier": "^3.4.1",
     "sinon": "^17.0.1",
     "tap": "^21.0.1",
     "ts-node": "^10.9.2",

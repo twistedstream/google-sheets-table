@@ -53,7 +53,7 @@ const table = new GoogleSheetsTable({
   console.log("Finding rows and sorting them:");
   const { rows: sortedRows } = await table.findRows(
     (r) => r.quantity < 50,
-    [{ asc: "department" }, { desc: "name" }]
+    [{ asc: "department" }, { desc: "name" }],
   );
   console.log(sortedRows);
   // => [

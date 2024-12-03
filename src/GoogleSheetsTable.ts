@@ -130,7 +130,7 @@ export class GoogleSheetsTable {
 
     const predicate =
       arg1 === undefined || Array.isArray(arg1) ? () => true : arg1;
-    const sorting = Array.isArray(arg1) ? arg1 : arg2 ?? [];
+    const sorting = Array.isArray(arg1) ? arg1 : (arg2 ?? []);
 
     const { sheetName } = this.options;
     const { rows, columns } = await openTable(
