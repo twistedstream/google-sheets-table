@@ -1,9 +1,9 @@
-import { test } from "tap";
+import { t } from "tap";
 
-import { ConstraintViolationsError, ErrorWithData, assertValue } from "./error";
+import { assertValue, ConstraintViolationsError, ErrorWithData } from "./error";
 import { ConstraintViolation } from "./types";
 
-test("error", async (t) => {
+t.test("error", async (t) => {
   t.test("ErrorWithData", async (t) => {
     t.test("#constructor", async (t) => {
       t.test("creates expected error", async (t) => {

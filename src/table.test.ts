@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import sinon from "sinon";
-import { test } from "tap";
+import { t, Test } from "tap";
+
 import { ConstraintViolationsError } from "./error";
 import { ColumnConstraints } from "./types";
 
@@ -17,15 +18,15 @@ const valuesToRowStub = sinon.stub();
 
 // helpers
 
-function importModule(test: Tap.Test) {
-  return test.mock("./table", {
+function importModule(t: Test) {
+  return t.mockRequire("./table", {
     "./row": {
       valuesToRow: valuesToRowStub,
     },
   });
 }
 
-test("table", async (t) => {
+t.test("table", async (t) => {
   t.beforeEach(async () => {
     sinon.resetBehavior();
     sinon.resetHistory();

@@ -14,6 +14,7 @@ import {
 export { ConstraintViolationsError, GoogleSheetsTable };
 
 // types
+/* c8 ignore start */
 export {
   ColumnConstraints,
   ConstraintViolation,
@@ -23,3 +24,4 @@ export {
   RowData,
   SearchPredicate,
 };
+/* c8 ignore stop */
