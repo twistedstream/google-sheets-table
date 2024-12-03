@@ -17,6 +17,7 @@
     "build": "tsup ./src/index.ts --format cjs,esm --dts && npx fix-tsup-cjs",
     "example": "npm run build && nodemon ./example.js",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "rm -rf ./dist && tap run"
   },
   "prepublish": "tsc",
@@ -31,9 +32,9 @@
   },
   "homepage": "https://github.com/twistedstream/google-sheets-table#readme",
   "dependencies": {
-    "@googleapis/sheets": "^5.0.5",
-    "async-mutex": "^0.4.1",
-    "google-auth-library": "^9.5.0",
+    "@googleapis/sheets": "^9.3.1",
+    "async-mutex": "^0.5.0",
+    "google-auth-library": "^9.15.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -41,14 +42,14 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.17.9",
     "@types/sinon": "^17.0.3",
-    "dotenv": "^16.4.1",
+    "dotenv": "^16.4.7",
     "fix-tsup-cjs": "^1.2.0",
-    "nodemon": "^3.0.3",
-    "prettier": "^3.2.4",
-    "sinon": "^17.0.1",
+    "nodemon": "^3.1.7",
+    "prettier": "^3.4.1",
+    "sinon": "^19.0.2",
     "tap": "^21.0.1",
     "ts-node": "^10.9.2",
-    "tsup": "^8.0.1",
+    "tsup": "^8.3.5",
     "typedoc": "^0.27.2",
     "typescript": "^5.7.2"
   },

@@ -25,7 +25,7 @@ jobs:
         run: npm run build --if-present
 
       - name: Check code formatting
-        run: npm run format
+        run: npm run format:check
 
       - name: Run unit tests
         run: npm run test
