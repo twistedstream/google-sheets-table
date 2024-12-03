@@ -1,6 +1,6 @@
 {
   "name": "google-sheets-table",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Treat a Google Sheet like a database table",
   "engines": {
     "node": ">=20.18.1",
