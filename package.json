@@ -32,7 +32,7 @@
   "homepage": "https://github.com/twistedstream/google-sheets-table#readme",
   "dependencies": {
     "@googleapis/sheets": "^9.3.1",
-    "async-mutex": "^0.4.1",
+    "async-mutex": "^0.5.0",
     "google-auth-library": "^9.5.0",
     "lodash": "^4.17.21"
   },
