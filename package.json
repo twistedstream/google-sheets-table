@@ -3,8 +3,8 @@
   "version": "0.8.2",
   "description": "Treat a Google Sheet like a database table",
   "engines": {
-    "node": ">=20.11.0",
-    "npm": ">=10.2.4"
+    "node": ">=20.18.1",
+    "npm": ">=10.8.2"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -37,9 +37,9 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
+    "@tsconfig/node20": "^20.1.4",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.5",
+    "@types/node": "^20.17.9",
     "@types/sinon": "^17.0.3",
     "@types/tap": "^15.0.7",
     "dotenv": "^16.4.1",
@@ -51,7 +51,7 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.0.1",
     "typedoc": "^0.25.8",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.2"
   },
   "tap": {
     "coverage-map": "code-coverage-map.js"
